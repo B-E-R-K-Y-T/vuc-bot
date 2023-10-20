@@ -19,9 +19,11 @@ class Security:
             if self.debug_mode:
                 return func(message, *args, **kwargs)
 
+            # TODO: Сделать проверку, на то, что пользак есть в бд
             if message.chat.id == GOD_ID:
                 return func(message, *args, **kwargs)
             else:
                 self.bot.reply_to(message, Message.ACCESS_DENIED)
 
         return wrapper
+
