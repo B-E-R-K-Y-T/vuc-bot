@@ -12,11 +12,7 @@ class RegistrationStates(Enum):
     INSTITUTE = auto()
     COURSE_NUMBER = auto()
     VUS = auto()
-
     FINAL = auto()
-
-    def __contains__(self, item):
-        return item in [getattr(self, attr) for attr in dir(self) if attr.isupper()]
 
 
 class FiniteStateMachineRegistration:

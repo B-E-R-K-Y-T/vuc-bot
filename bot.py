@@ -7,7 +7,7 @@ from utils.user_worker.user import listen_user, USERS
 from utils.fsm.registration import RegistrationStates, MSG_STATES, FiniteStateMachineRegistration
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
-security = Security(bot=bot)
+security = Security(bot=bot, debug=False)
 REG_FSM = {}
 
 
@@ -52,7 +52,6 @@ def handler_message(message):
 
 def get_id(message):
     return message.chat.id
-
 
 
 bot.infinity_polling()

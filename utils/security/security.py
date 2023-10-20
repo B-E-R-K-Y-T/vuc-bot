@@ -2,9 +2,9 @@ from config import Message, GOD_ID
 
 
 class Security:
-    def __init__(self, bot):
+    def __init__(self, bot, debug):
         self.bot = bot
-        self.__debug_mode = False
+        self.__debug_mode = debug
 
     @property
     def debug_mode(self):
