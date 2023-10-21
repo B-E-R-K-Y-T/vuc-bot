@@ -1,7 +1,7 @@
-from utils.fsm.registrarion.state import STATE
+from utils.fsm.get_token.state import STATE
 
 
-class FiniteStateMachineRegistration:
+class FiniteStateMachineGetToken:
     def __init__(self, user):
         self.user = user
         self.states = STATE

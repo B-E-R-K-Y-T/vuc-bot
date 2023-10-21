@@ -40,3 +40,8 @@ class DirectionOfStudyException(MainException):
 
 class GroupStudyException(MainException):
     pass
+
+
+class AmountTokenException(MainException):
+    pass
+

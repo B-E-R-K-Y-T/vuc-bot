@@ -1,4 +1,4 @@
-USERS = {}
+users = {}
 
 
 class User:
@@ -57,11 +57,11 @@ class WriterData:
         return self.data
 
 
-def listen_user(func):
+def save_user(func):
     def wrapper(message, *args, **kwargs):
         telegram_id = message.chat.id
-        if telegram_id not in USERS:
-            USERS[telegram_id] = User(telegram_id)
+        if telegram_id not in users:
+            users[telegram_id] = User(telegram_id)
 
         return func(message, *args, **kwargs)
 
