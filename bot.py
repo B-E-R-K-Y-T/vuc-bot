@@ -4,7 +4,7 @@ from config import TELEGRAM_BOT_TOKEN, Message, Commands
 from utils.fsm.registrarion.state import REGISTRATION_MSG_STATES, RegistrationStates
 from utils.security.security import Security, is_admin, get_token
 from utils.logger import log
-from utils.user_worker.user import save_user, users
+from utils.user_worker.user import save_user, get_telegram_id, get_user
 from utils.fsm.registrarion.registration import FiniteStateMachineRegistration
 from utils.fsm.registrarion.handlers import REGISTRATION_HANDLERS
 from utils.exceptions import MainException
@@ -31,9 +31,9 @@ def send_welcome(message):
 def command_reg(message):
     bot.reply_to(message, Message.Registration.WARNING)
     bot.send_message(message.chat.id, Message.Registration.NAME)
-    state = FiniteStateMachineRegistration(users[get_id(message)])
+    state = FiniteStateMachineRegistration(get_user(get_telegram_id(message)))
     state.next_state()
-    fsm[get_id(message)] = state
+    fsm[get_telegram_id(message)] = state
 
 
 @bot.message_handler(commands=[Commands.GET_TOKEN])
@@ -41,11 +41,11 @@ def command_reg(message):
 @save_user
 @security.is_login
 def command_get_token(message):
-    if is_admin(get_id(message)):
+    if is_admin(get_telegram_id(message)):
         bot.send_message(message.chat.id, Message.GetToken.AMOUNT_TOKEN)
-        state = FiniteStateMachineGetToken(users[get_id(message)])
+        state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
         state.next_state()
-        fsm[get_id(message)] = state
+        fsm[get_telegram_id(message)] = state
 
 
 @bot.message_handler(commands=[Commands.STOP_PROCESS])
@@ -53,10 +53,10 @@ def command_get_token(message):
 @save_user
 @security.is_login
 def command_stop_process(message):
-    users[get_id(message)].state = None
+    get_user(get_telegram_id(message)).state = None
 
-    if fsm.get(get_id(message)) is not None:
-        del fsm[get_id(message)]
+    if fsm.get(get_telegram_id(message)) is not None:
+        del fsm[get_telegram_id(message)]
 
     bot.reply_to(message, Message.STOP_PROCESS)
 
@@ -66,7 +66,7 @@ def command_stop_process(message):
 @save_user
 @security.is_login
 def command_stop_process(message):
-    ...
+    bot.reply_to(message, get_user(get_telegram_id(message)))
 
 
 @bot.message_handler(func=lambda m: True)
@@ -74,8 +74,7 @@ def command_stop_process(message):
 @save_user
 @security.is_login
 def handler_message(message):
-    telegram_id = get_id(message)
-    user = users[telegram_id]
+    user = get_user(get_telegram_id(message))
 
     if isinstance(user.state, RegistrationStates):
         handler_registration(user, message)
@@ -98,30 +97,26 @@ def handler_get_token(user, message):
         for number in range(amount):
             tokens += f'{number + 1}) {get_token()}\n\n'
 
-        bot.send_message(get_id(message), tokens)
+        bot.send_message(get_telegram_id(message), tokens)
 
 
 def handler_state(user, message, state, handlers, msg_states) -> bool:
     if user.state == state.FINAL:
         user.state = None
-        del fsm[get_id(message)]
+        del fsm[get_telegram_id(message)]
 
         return False
     else:
         try:
-            handlers[users[get_id(message)].state](message.text)
-            fsm[get_id(message)].next_state()
-            bot.send_message(get_id(message), msg_states[users[get_id(message)].state])
+            handlers[get_user(get_telegram_id(message)).state](message.text)
+            fsm[get_telegram_id(message)].next_state()
+            bot.send_message(get_telegram_id(message), msg_states[get_user(get_telegram_id(message)).state])
         except MainException as e:
             bot.reply_to(message, e)
 
             return False
 
         return True
-
-
-def get_id(message):
-    return message.chat.id
 
 
 bot.infinity_polling()
