@@ -13,7 +13,7 @@ class Security:
             if DEBUG:
                 return func(message, *args, **kwargs)
 
-            # TODO: Сделать проверку, на то, что пользак есть в бд
+            # TODO: Сделать проверку, на то, что у пользака есть токен
             if message.chat.id in ADMINS_ID:
                 return func(message, *args, **kwargs)
             else:

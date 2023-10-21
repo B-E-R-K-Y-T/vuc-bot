@@ -6,7 +6,7 @@ class User:
         self.writer = WriterData()
         self.__telegram_id = telegram_id
         self.__state = None
-        self.name = UserName()
+        self.name = None
         self.date_of_brith = None
         self.phone_number = None
         self.mail = None
@@ -56,17 +56,6 @@ class User:
                f'ID: {self.__telegram_id}\n')
 
         return res
-
-
-class UserName:
-    def __init__(self):
-        self.__name = None
-
-    def __get__(self):
-        return self.__name
-
-    def __set__(self, _, name):
-        self.__name = name
 
 
 class WriterData:

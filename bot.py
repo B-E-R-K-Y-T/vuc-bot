@@ -1,6 +1,7 @@
 import telebot
 
 from config import TELEGRAM_BOT_TOKEN, Message, Commands
+from utils.fsm.fsm_worker import FSMWorker
 from utils.fsm.registrarion.state import REGISTRATION_MSG_STATES, RegistrationStates
 from utils.security.security import Security, is_admin, get_token
 from utils.logger import log
@@ -14,7 +15,7 @@ from utils.fsm.get_token.validators import GET_TOKEN_VALIDATORS
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
 security = Security(bot=bot)
-fsm = {}
+fsm_worker = FSMWorker()
 
 
 @bot.message_handler(commands=[Commands.START, Commands.HELP])
@@ -36,7 +37,7 @@ def command_reg(message):
 
     get_user(get_telegram_id(message)).writer.data = []
 
-    fsm[get_telegram_id(message)] = state
+    fsm_worker.set_fsm_obj(get_telegram_id(message), state)
 
 
 @bot.message_handler(commands=[Commands.GET_TOKEN])
@@ -48,7 +49,8 @@ def command_get_token(message):
         bot.send_message(message.chat.id, Message.GetToken.TYPE_TOKEN)
         state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
         state.next_state()
-        fsm[get_telegram_id(message)] = state
+
+        fsm_worker.set_fsm_obj(get_telegram_id(message), state)
     else:
         bot.reply_to(message, Message.ACCESS_DENIED)
 
@@ -123,7 +125,7 @@ def handler_state(user, message, state, validators, msg_states) -> bool:
 
             return False
         else:
-            fsm[get_telegram_id(message)].next_state()
+            fsm_worker.get_fsm_obj(get_telegram_id(message)).next_state()
             bot.send_message(get_telegram_id(message), msg_states[get_user(get_telegram_id(message)).state])
 
             return True
