@@ -10,5 +10,5 @@
 * /help
 * /self
 * /get_token
-* /stop_process
+* /stop
 

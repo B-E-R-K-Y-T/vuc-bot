@@ -11,7 +11,7 @@ def _get_max_size_log():
 def _clear_logs_file(file):
     stats = os.stat(file)
 
-    if stats.st_size >= _get_max_size_log():
+    if stats.st_size >= _get_max_size_log() and MAX_SIZE_KB_LOG != -1:
         os.remove(file)
 
 
@@ -25,13 +25,14 @@ def log(func):
         if LOG_MODE:
             path = f'{PATH_TO_LOG_DIR}\\{message.from_user.username}_{message.chat.id}.txt'
             _create_logs_if_not_exists()
-            _clear_logs_file(path)
 
             text = f'TIME: {datetime.datetime.now()}: \n\tMSG_FROM_USER: {message.text}\n'
 
             print(f'{message.from_user.username=} -> {message.chat.id=} -> {text}')
             with open(file=path, mode='a') as file:
                 file.write(text)
+
+            _clear_logs_file(path)
 
         return func(message, *args, **kwargs)
 

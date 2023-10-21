@@ -5,15 +5,15 @@ GOD_ID = os.getenv('GOD_ID')
 # telegram id админов
 ADMINS_ID = tuple(int(t_id) for t_id in os.getenv('ADMINS_ID').split(',') if t_id.isnumeric())
 # Минимальный возраст поступления на военную кафедру
-MINIUM_AGE_ENTRANCE = 18
+MINIUM_AGE_ENTRANCE = int(os.getenv('MINIUM_AGE_ENTRANCE'))
 # Максимальная длина токена(Больше ставить не рекомендуется)
-LEN_TOKEN = 25
+LEN_TOKEN = int(os.getenv('LEN_TOKEN'))
 # Максимальное кол-во токенов(Больше ставить не рекомендуется)
-MAX_AMOUNT_TOKEN = 100
+MAX_AMOUNT_TOKEN = int(os.getenv('MAX_AMOUNT_TOKEN'))
 # Если False, то бот, не будет записывать в логи то, что пишет пользователь
 LOG_MODE = True
-# Максимальный размер логов (для отдельного юзера!)
-MAX_SIZE_KB_LOG = 500
+# Максимальный размер логов (для отдельного юзера!) (Если указать -1, то размер будет бесконечным)
+MAX_SIZE_KB_LOG = int(os.getenv('MAX_SIZE_KB_LOG'))
 PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
 ENUM_TYPE_TOKEN = ('Командир отделения', 'Командир взвода', 'Студент')
 # Режим дебага. Никаких ролей и безопасности
