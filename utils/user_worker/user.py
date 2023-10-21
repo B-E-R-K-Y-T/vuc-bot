@@ -105,10 +105,3 @@ def get_telegram_id(message):
 
 def get_user(telegram_id):
     return users[telegram_id]
-
-
-if __name__ == '__main__':
-    usr = User(123)
-    print(usr.name)
-    usr.name = '123123'
-    print(usr.name)

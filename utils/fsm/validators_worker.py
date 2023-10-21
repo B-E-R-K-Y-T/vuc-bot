@@ -3,8 +3,8 @@ class ValidatorWorker:
         self.validators = {}
 
     def save_validator(self, state):
-        def decorator(handler: callable):
-            self.validators[state] = handler
+        def decorator(validator: callable):
+            self.validators[state] = validator
 
         return decorator
 

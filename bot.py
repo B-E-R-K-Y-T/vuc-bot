@@ -49,9 +49,11 @@ def command_get_token(message):
         state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
         state.next_state()
         fsm[get_telegram_id(message)] = state
+    else:
+        bot.reply_to(message, Message.ACCESS_DENIED)
 
 
-@bot.message_handler(commands=[Commands.STOP_PROCESS])
+@bot.message_handler(commands=[Commands.ROLLBACK_PROCESS])
 @log
 @save_user
 @security.is_login
@@ -65,7 +67,7 @@ def command_stop_process(message):
 @log
 @save_user
 @security.is_login
-def command_stop_process(message):
+def command_self(message):
     bot.reply_to(message, get_user(get_telegram_id(message)))
 
 

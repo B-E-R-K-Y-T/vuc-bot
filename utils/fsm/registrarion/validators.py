@@ -107,13 +107,15 @@ def validator_vus(text: str):
 
 @vw.save_validator(RegistrationStates.PLATOON)
 def validator_platoon(text: str):
-    if not text.isnumeric():
+    if not text.isnumeric() and len(text) == 3:
         raise PlatoonException(Message.Error.PLATOON)
 
 
 @vw.save_validator(RegistrationStates.SQUAD)
 def validator_squad(text: str):
     if not text.isnumeric():
+        raise SquadException(Message.Error.SQUAD)
+    elif not 1 <= int(text) <= 3:
         raise SquadException(Message.Error.SQUAD)
 
 

@@ -29,7 +29,7 @@ def log(func):
             text = f'TIME: {datetime.datetime.now()}: \n\tMSG_FROM_USER: {message.text}\n'
 
             print(f'{message.from_user.username=} -> {message.chat.id=} -> {text}')
-            with open(file=path, mode='a') as file:
+            with open(file=path, mode='a', encoding='utf-8') as file:
                 file.write(text)
 
             _clear_logs_file(path)
