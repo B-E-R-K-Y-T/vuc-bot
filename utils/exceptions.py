@@ -45,3 +45,12 @@ class GroupStudyException(MainException):
 class AmountTokenException(MainException):
     pass
 
+
+class PlatoonException(MainException):
+    pass
+
+
+
+class SquadException(MainException):
+    pass
+

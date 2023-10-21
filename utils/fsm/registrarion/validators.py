@@ -3,16 +3,17 @@ import string
 
 from config import Message, MINIUM_AGE_ENTRANCE
 from utils.exceptions import NameException, DateException, PhoneException, MailException, InstituteException, \
-    AddressException, CourseNumberException, VusException, DirectionOfStudyException, GroupStudyException
+    AddressException, CourseNumberException, VusException, DirectionOfStudyException, GroupStudyException, \
+    PlatoonException, SquadException
 from datetime import datetime
-from utils.fsm.handlers_worker import HandlerWorker
+from utils.fsm.validators_worker import ValidatorWorker
 from utils.fsm.registrarion.state import RegistrationStates
 
-hw = HandlerWorker()
+vw = ValidatorWorker()
 
 
-@hw.save_handler(RegistrationStates.NAME)
-def handler_name_state(text: str):
+@vw.save_validator(RegistrationStates.NAME)
+def validator_name_state(text: str):
     text = text.split(' ')
 
     if len(text) != 3:
@@ -23,8 +24,8 @@ def handler_name_state(text: str):
                 raise NameException(Message.Error.NAME_DIGIT)
 
 
-@hw.save_handler(RegistrationStates.DATE_OF_BIRTH)
-def handler_date_of_birth(text: str):
+@vw.save_validator(RegistrationStates.DATE_OF_BIRTH)
+def validator_date_of_birth(text: str):
     text = [int(i) for i in text.split('.') if i.isnumeric()]
 
     if len(text) != 3:
@@ -40,22 +41,22 @@ def handler_date_of_birth(text: str):
             raise DateException(Message.Error.DATE)
 
 
-@hw.save_handler(RegistrationStates.PHONE_NUMBER)
-def handler_phone_number(text: str):
+@vw.save_validator(RegistrationStates.PHONE_NUMBER)
+def validator_phone_number(text: str):
     text = text.replace(' ', '')
 
     if not re.fullmatch(pattern=r'^((\+7|7|8)+([0-9]){10})$', string=text):
         raise PhoneException(Message.Error.PHONE)
 
 
-@hw.save_handler(RegistrationStates.MAIL)
-def handler_mail(text: str):
+@vw.save_validator(RegistrationStates.MAIL)
+def validator_mail(text: str):
     if not re.fullmatch(pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', string=text):
         raise MailException(Message.Error.MAIL)
 
 
-@hw.save_handler(RegistrationStates.ADDRESS)
-def handler_address(text: str):
+@vw.save_validator(RegistrationStates.ADDRESS)
+def validator_address(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
             break
@@ -63,8 +64,8 @@ def handler_address(text: str):
         raise AddressException(Message.Error.ADDRESS)
 
 
-@hw.save_handler(RegistrationStates.INSTITUTE)
-def handler_institute(text: str):
+@vw.save_validator(RegistrationStates.INSTITUTE)
+def validator_institute(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
             break
@@ -72,8 +73,8 @@ def handler_institute(text: str):
         raise InstituteException(Message.Error.INSTITUTE)
 
 
-@hw.save_handler(RegistrationStates.DIRECTION_OF_STUDY)
-def handler_direction_of_study(text: str):
+@vw.save_validator(RegistrationStates.DIRECTION_OF_STUDY)
+def validator_direction_of_study(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
             break
@@ -81,8 +82,8 @@ def handler_direction_of_study(text: str):
         raise DirectionOfStudyException(Message.Error.DIRECTION_OF_STUDY)
 
 
-@hw.save_handler(RegistrationStates.GROUP_STUDY)
-def handler_group_study(text: str):
+@vw.save_validator(RegistrationStates.GROUP_STUDY)
+def validator_group_study(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
             break
@@ -90,18 +91,30 @@ def handler_group_study(text: str):
         raise GroupStudyException(Message.Error.GROUP_STUDY)
 
 
-@hw.save_handler(RegistrationStates.COURSE_NUMBER)
-def handler_course_number(text: str):
+@vw.save_validator(RegistrationStates.COURSE_NUMBER)
+def validator_course_number(text: str):
     if not text.isnumeric():
         raise CourseNumberException(Message.Error.COURSE_NUMBER)
     elif not 1 <= int(text) <= 8:
         raise CourseNumberException(Message.Error.COURSE_NUMBER)
 
 
-@hw.save_handler(RegistrationStates.VUS)
-def handler_vus(text: str):
+@vw.save_validator(RegistrationStates.VUS)
+def validator_vus(text: str):
     if not text.isdigit():
         raise VusException(Message.Error.VUS)
 
 
-REGISTRATION_HANDLERS = hw.get_handlers()
+@vw.save_validator(RegistrationStates.PLATOON)
+def validator_platoon(text: str):
+    if not text.isdigit():
+        raise PlatoonException(Message.Error.PLATOON)
+
+
+@vw.save_validator(RegistrationStates.SQUAD)
+def validator_squad(text: str):
+    if not text.isdigit():
+        raise SquadException(Message.Error.SQUAD)
+
+
+REGISTRATION_VALIDATORS = vw.get_validators()

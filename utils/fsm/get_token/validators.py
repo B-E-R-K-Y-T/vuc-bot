@@ -1,17 +1,17 @@
 from config import Message, MAX_AMOUNT_TOKEN
-from utils.fsm.handlers_worker import HandlerWorker
+from utils.fsm.validators_worker import ValidatorWorker
 from utils.fsm.get_token.state import GetTokenState
 from utils.exceptions import AmountTokenException
 
-hw = HandlerWorker()
+vw = ValidatorWorker()
 
 
-@hw.save_handler(GetTokenState.AMOUNT_TOKEN)
-def handler_amount_token(text: str):
+@vw.save_validator(GetTokenState.AMOUNT_TOKEN)
+def validator_amount_token(text: str):
     if not text.isnumeric():
         raise AmountTokenException(Message.Error.AMOUNT_TOKEN)
     elif not 1 <= int(text) <= MAX_AMOUNT_TOKEN:
         raise AmountTokenException(Message.Error.AMOUNT_TOKEN_MAX)
 
 
-GET_TOKEN_HANDLERS = hw.get_handlers()
+GET_TOKEN_VALIDATORS = vw.get_validators()

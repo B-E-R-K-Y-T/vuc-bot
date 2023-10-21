@@ -16,6 +16,8 @@ class User:
         self.group_study = None
         self.course_number = None
         self.vus = None
+        self.platoon = None
+        self.squad = None
 
     @property
     def telegram_id(self):
@@ -35,19 +37,22 @@ class User:
 
     def write_data(self):
         (self.name, self.date_of_brith, self.phone_number, self.mail, self.address,
-         self.institute, self.direction_of_study, self.group_study, self.course_number, self.vus) = self.writer.get_data()
+         self.institute, self.direction_of_study, self.group_study, self.course_number,
+         self.vus, self.platoon, self.squad) = self.writer.get_data()
 
     def __str__(self):
-        res = (f'ФИО: {self.name}'
-               f'Дата рождения: {self.date_of_brith}'
-               f'Номер телефона: {self.phone_number}'
-               f'Почта: {self.mail}'
-               f'Адрес: {self.address}'
-               f'Институт: {self.institute}'
-               f'Направление: {self.direction_of_study}'
-               f'Группа: {self.group_study}'
-               f'Номер курса: {self.course_number}'
-               f'ВУС: {self.course_number}')
+        res = (f'ФИО: {self.name}\n'
+               f'Дата рождения: {self.date_of_brith}\n'
+               f'Номер телефона: {self.phone_number}\n'
+               f'Почта: {self.mail}\n'
+               f'Адрес: {self.address}\n'
+               f'Институт: {self.institute}\n'
+               f'Направление: {self.direction_of_study}\n'
+               f'Группа: {self.group_study}\n'
+               f'Номер курса: {self.course_number}\n'
+               f'ВУС: {self.vus}\n'
+               f'Взвод: {self.platoon}\n'
+               f'Отделение: {self.squad}\n')
 
         return res
 
@@ -65,13 +70,21 @@ class UserName:
 
 class WriterData:
     def __init__(self):
-        self.data = []
+        self.__data = []
 
     def next_data(self, value):
-        self.data.append(value)
+        self.__data.append(value)
 
     def get_data(self):
-        return self.data
+        return self.__data
+
+    @property
+    def data(self):
+        return self.__data
+
+    @data.setter
+    def data(self, seq: list):
+        self.__data = seq
 
 
 def save_user(func):

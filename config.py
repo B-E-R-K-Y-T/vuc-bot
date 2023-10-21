@@ -1,11 +1,14 @@
 import os
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+GOD_ID = os.getenv('GOD_ID')
 # telegram id админов
-ADMINS_ID = tuple(int(t_id) for t_id in os.getenv('GOD_ID').split(',') if t_id.isnumeric())
+ADMINS_ID = tuple(int(t_id) for t_id in os.getenv('ADMINS_ID').split(',') if t_id.isnumeric())
 # Минимальный возраст поступления на военную кафедру
 MINIUM_AGE_ENTRANCE = 18
+# Максимальная длина токена(Больше ставить не рекомендуется)
 LEN_TOKEN = 25
+# Максимальное кол-во токенов(Больше ставить не рекомендуется)
 MAX_AMOUNT_TOKEN = 100
 
 
@@ -37,6 +40,8 @@ class Message:
         GROUP_STUDY = 'Введите Вашу учебную группу: '
         COURSE_NUMBER = 'Введите номер курса: '
         VUS = 'Введите ваш ВУС*: \n\n*Военно-учетная специальность'
+        PLATOON = 'Введите номер Вашего взвода: '
+        SQUAD = 'Введите номер Вашего отделения: '
         FINAL = 'Регистрация окончена. Сохраняю данные'
 
     class GetToken:
@@ -55,5 +60,7 @@ class Message:
         ADDRESS = 'Адрес не может состоять только из цифр и знаков пунктуации!'
         COURSE_NUMBER = 'Номер курса должен состоять из цифр, а также должен быть в промежутке от 1 до 8!'
         VUS = 'ВУС должен состоять из цифр!'
+        PLATOON = 'Номер взвода должен состоять из цифр!'
+        SQUAD = 'Номер отделения должен состоять из цифр!'
         AMOUNT_TOKEN = 'Введите количество токенов цифрой!'
         AMOUNT_TOKEN_MAX = f'Можно указать только от 1 до {MAX_AMOUNT_TOKEN} токенов!'

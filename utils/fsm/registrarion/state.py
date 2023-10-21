@@ -15,6 +15,8 @@ class RegistrationStates(Enum):
     GROUP_STUDY = auto()
     COURSE_NUMBER = auto()
     VUS = auto()
+    PLATOON = auto()
+    SQUAD = auto()
     FINAL = auto()
 
 
@@ -29,6 +31,8 @@ STATE = (
     RegistrationStates.GROUP_STUDY,
     RegistrationStates.COURSE_NUMBER,
     RegistrationStates.VUS,
+    RegistrationStates.PLATOON,
+    RegistrationStates.SQUAD,
     RegistrationStates.FINAL,
 )
 
@@ -41,6 +45,8 @@ REGISTRATION_MSG_STATES = {
     RegistrationStates.INSTITUTE: Message.Registration.INSTITUTE,
     RegistrationStates.COURSE_NUMBER: Message.Registration.COURSE_NUMBER,
     RegistrationStates.VUS: Message.Registration.VUS,
+    RegistrationStates.PLATOON: Message.Registration.PLATOON,
+    RegistrationStates.SQUAD: Message.Registration.SQUAD,
     RegistrationStates.DIRECTION_OF_STUDY: Message.Registration.DIRECTION_OF_STUDY,
     RegistrationStates.GROUP_STUDY: Message.Registration.GROUP_STUDY,
     RegistrationStates.FINAL: Message.Registration.FINAL,
