@@ -26,10 +26,23 @@ class RegistrationStates(Enum):
 class FiniteStateMachineRegistration:
     def __init__(self, user):
         self.user = user
-        self.states = iter(STATES)
+        self.states = (
+            RegistrationStates.NAME,
+            RegistrationStates.DATE_OF_BIRTH,
+            RegistrationStates.PHONE_NUMBER,
+            RegistrationStates.MAIL,
+            RegistrationStates.ADDRESS,
+            RegistrationStates.INSTITUTE,
+            RegistrationStates.DIRECTION_OF_STUDY,
+            RegistrationStates.GROUP_STUDY,
+            RegistrationStates.COURSE_NUMBER,
+            RegistrationStates.VUS,
+            RegistrationStates.FINAL,
+        )
+        self.iter_states = iter(self.states)
 
     def next_state(self):
-        self.user.state = next(self.states)
+        self.user.state = next(self.iter_states)
 
 
 def handler_name_state(text: str):
@@ -142,21 +155,5 @@ MSG_STATES = {
     RegistrationStates.FINAL: Message.Registration.FINAL,
 }
 
-STATES = [
-    RegistrationStates.NAME,
-    RegistrationStates.DATE_OF_BIRTH,
-    RegistrationStates.PHONE_NUMBER,
-    RegistrationStates.MAIL,
-    RegistrationStates.ADDRESS,
-    RegistrationStates.INSTITUTE,
-    RegistrationStates.DIRECTION_OF_STUDY,
-    RegistrationStates.GROUP_STUDY,
-    RegistrationStates.COURSE_NUMBER,
-    RegistrationStates.VUS,
-    RegistrationStates.FINAL,
-]
-
-
 if __name__ == '__main__':
     s = RegistrationStates(1)
-
