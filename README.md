@@ -6,4 +6,9 @@
 Команды бота:
 
 * /reg
-* 
+* /start
+* /help
+* /self
+* /get_token
+* /stop_process
+

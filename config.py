@@ -17,6 +17,7 @@ MAX_SIZE_MB_LOG = 1
 PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
 ENUM_TYPE_TOKEN = ('Командир отделения', 'Командир взвода', 'Студент')
 
+
 class Commands:
     START = 'start'
     HELP = 'help'
