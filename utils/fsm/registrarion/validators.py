@@ -101,19 +101,19 @@ def validator_course_number(text: str):
 
 @vw.save_validator(RegistrationStates.VUS)
 def validator_vus(text: str):
-    if not text.isdigit():
+    if not text.isnumeric():
         raise VusException(Message.Error.VUS)
 
 
 @vw.save_validator(RegistrationStates.PLATOON)
 def validator_platoon(text: str):
-    if not text.isdigit():
+    if not text.isnumeric():
         raise PlatoonException(Message.Error.PLATOON)
 
 
 @vw.save_validator(RegistrationStates.SQUAD)
 def validator_squad(text: str):
-    if not text.isdigit():
+    if not text.isnumeric():
         raise SquadException(Message.Error.SQUAD)
 
 

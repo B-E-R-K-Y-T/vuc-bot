@@ -1,13 +1,13 @@
 import random
 import string
 
-from config import Message, ADMINS_ID, LEN_TOKEN
+from config import Message, ADMINS_ID, LEN_TOKEN, DEBUG
 
 
 class Security:
-    def __init__(self, bot, debug):
+    def __init__(self, bot):
         self.bot = bot
-        self.__debug_mode = debug
+        self.__debug_mode = DEBUG
 
     @property
     def debug_mode(self):

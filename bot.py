@@ -13,7 +13,7 @@ from utils.fsm.get_token.state import GET_TOKEN_MSG_STATES, GetTokenState
 from utils.fsm.get_token.validators import GET_TOKEN_VALIDATORS
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
-security = Security(bot=bot, debug=False)
+security = Security(bot=bot)
 fsm = {}
 
 

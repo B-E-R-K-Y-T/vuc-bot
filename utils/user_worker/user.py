@@ -52,7 +52,8 @@ class User:
                f'Номер курса: {self.course_number}\n'
                f'ВУС: {self.vus}\n'
                f'Взвод: {self.platoon}\n'
-               f'Отделение: {self.squad}\n')
+               f'Отделение: {self.squad}\n'
+               f'ID: {self.__telegram_id}\n')
 
         return res
 

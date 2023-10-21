@@ -50,7 +50,5 @@ class PlatoonException(MainException):
     pass
 
 
-
 class SquadException(MainException):
     pass
-
