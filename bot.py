@@ -3,7 +3,7 @@ import telebot
 from config import TELEGRAM_BOT_TOKEN, Message, Commands
 from utils.fsm.fsm_worker import FSMWorker
 from utils.fsm.registrarion.state import REGISTRATION_MSG_STATES, RegistrationStates
-from utils.security.security import Security, is_admin, get_token
+from utils.security.security import Security, get_token
 from utils.logger import log
 from utils.user_worker.user import save_user, get_telegram_id, get_user
 from utils.fsm.registrarion.registration_fsm import FiniteStateMachineRegistration
@@ -45,7 +45,7 @@ def command_reg(message):
 @save_user
 @security.is_login
 def command_get_token(message):
-    if is_admin(get_telegram_id(message)):
+    if security.is_admin(get_telegram_id(message)):
         bot.send_message(message.chat.id, Message.GetToken.TYPE_TOKEN)
         state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
         state.next_state()

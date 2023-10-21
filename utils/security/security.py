@@ -21,15 +21,15 @@ class Security:
 
         return wrapper
 
+    @staticmethod
+    def is_admin(telegram_id):
+        if DEBUG:
+            return True
 
-def is_admin(telegram_id):
-    if DEBUG:
-        return True
-
-    if telegram_id in ADMINS_ID:
-        return True
-    else:
-        return False
+        if telegram_id in ADMINS_ID:
+            return True
+        else:
+            return False
 
 
 def get_token():
