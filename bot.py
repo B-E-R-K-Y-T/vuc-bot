@@ -1,10 +1,12 @@
 import telebot
 
 from config import TELEGRAM_BOT_TOKEN, Message, Commands
+from utils.fsm.registrarion.state import REGISTRATION_MSG_STATES
 from utils.security.security import Security
 from utils.logger import log
 from utils.user_worker.user import listen_user, USERS
-from utils.fsm.registration import RegistrationStates, MSG_STATES, FiniteStateMachineRegistration, HANDLERS
+from utils.fsm.registrarion.registration import RegistrationStates, FiniteStateMachineRegistration
+from utils.fsm.registrarion.handlers import REGISTRATION_HANDLERS
 from utils.exceptions import MainException
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
@@ -52,9 +54,9 @@ def handler_registration(user, message):
         del REG_FSM[get_id(message)]
     else:
         try:
-            HANDLERS[USERS[get_id(message)].state](message.text)
+            REGISTRATION_HANDLERS[USERS[get_id(message)].state](message.text)
             REG_FSM[get_id(message)].next_state()
-            bot.send_message(get_id(message), MSG_STATES[USERS[get_id(message)].state])
+            bot.send_message(get_id(message), REGISTRATION_MSG_STATES[USERS[get_id(message)].state])
             user.writer.next_data(message.text)
         except MainException as e:
             bot.reply_to(message, e)

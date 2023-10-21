@@ -1,50 +1,17 @@
 import re
 import string
 
-from enum import Enum, auto, unique
 from config import Message, MINIUM_AGE_ENTRANCE
 from utils.exceptions import NameException, DateException, PhoneException, MailException, InstituteException, \
     AddressException, CourseNumberException, VusException, DirectionOfStudyException, GroupStudyException
 from datetime import datetime
+from utils.fsm.handlers_worker import HandlerWorker
+from utils.fsm.registrarion.state import RegistrationStates
+
+hw = HandlerWorker()
 
 
-@unique
-class RegistrationStates(Enum):
-    NAME = auto()
-    DATE_OF_BIRTH = auto()
-    PHONE_NUMBER = auto()
-    MAIL = auto()
-    ADDRESS = auto()
-    INSTITUTE = auto()
-    DIRECTION_OF_STUDY = auto()
-    GROUP_STUDY = auto()
-    COURSE_NUMBER = auto()
-    VUS = auto()
-    FINAL = auto()
-
-
-class FiniteStateMachineRegistration:
-    def __init__(self, user):
-        self.user = user
-        self.states = (
-            RegistrationStates.NAME,
-            RegistrationStates.DATE_OF_BIRTH,
-            RegistrationStates.PHONE_NUMBER,
-            RegistrationStates.MAIL,
-            RegistrationStates.ADDRESS,
-            RegistrationStates.INSTITUTE,
-            RegistrationStates.DIRECTION_OF_STUDY,
-            RegistrationStates.GROUP_STUDY,
-            RegistrationStates.COURSE_NUMBER,
-            RegistrationStates.VUS,
-            RegistrationStates.FINAL,
-        )
-        self.iter_states = iter(self.states)
-
-    def next_state(self):
-        self.user.state = next(self.iter_states)
-
-
+@hw.save_handler(RegistrationStates.NAME)
 def handler_name_state(text: str):
     text = text.split(' ')
 
@@ -56,6 +23,7 @@ def handler_name_state(text: str):
                 raise NameException(Message.Error.NAME_DIGIT)
 
 
+@hw.save_handler(RegistrationStates.DATE_OF_BIRTH)
 def handler_date_of_birth(text: str):
     text = [int(i) for i in text.split('.') if i.isnumeric()]
 
@@ -72,6 +40,7 @@ def handler_date_of_birth(text: str):
             raise DateException(Message.Error.DATE)
 
 
+@hw.save_handler(RegistrationStates.PHONE_NUMBER)
 def handler_phone_number(text: str):
     text = text.replace(' ', '')
 
@@ -79,11 +48,13 @@ def handler_phone_number(text: str):
         raise PhoneException(Message.Error.PHONE)
 
 
+@hw.save_handler(RegistrationStates.MAIL)
 def handler_mail(text: str):
     if not re.fullmatch(pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', string=text):
         raise MailException(Message.Error.MAIL)
 
 
+@hw.save_handler(RegistrationStates.ADDRESS)
 def handler_address(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
@@ -92,6 +63,7 @@ def handler_address(text: str):
         raise AddressException(Message.Error.ADDRESS)
 
 
+@hw.save_handler(RegistrationStates.INSTITUTE)
 def handler_institute(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
@@ -100,6 +72,7 @@ def handler_institute(text: str):
         raise InstituteException(Message.Error.INSTITUTE)
 
 
+@hw.save_handler(RegistrationStates.DIRECTION_OF_STUDY)
 def handler_direction_of_study(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
@@ -108,6 +81,7 @@ def handler_direction_of_study(text: str):
         raise DirectionOfStudyException(Message.Error.DIRECTION_OF_STUDY)
 
 
+@hw.save_handler(RegistrationStates.GROUP_STUDY)
 def handler_group_study(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
@@ -116,6 +90,7 @@ def handler_group_study(text: str):
         raise GroupStudyException(Message.Error.GROUP_STUDY)
 
 
+@hw.save_handler(RegistrationStates.COURSE_NUMBER)
 def handler_course_number(text: str):
     if not text.isnumeric():
         raise CourseNumberException(Message.Error.COURSE_NUMBER)
@@ -123,37 +98,10 @@ def handler_course_number(text: str):
         raise CourseNumberException(Message.Error.COURSE_NUMBER)
 
 
+@hw.save_handler(RegistrationStates.VUS)
 def handler_vus(text: str):
     if not text.isdigit():
         raise VusException(Message.Error.VUS)
 
 
-HANDLERS = {
-    RegistrationStates.NAME: handler_name_state,
-    RegistrationStates.DATE_OF_BIRTH: handler_date_of_birth,
-    RegistrationStates.PHONE_NUMBER: handler_phone_number,
-    RegistrationStates.MAIL: handler_mail,
-    RegistrationStates.ADDRESS: handler_address,
-    RegistrationStates.INSTITUTE: handler_institute,
-    RegistrationStates.COURSE_NUMBER: handler_course_number,
-    RegistrationStates.VUS: handler_vus,
-    RegistrationStates.DIRECTION_OF_STUDY: handler_direction_of_study,
-    RegistrationStates.GROUP_STUDY: handler_group_study,
-}
-
-MSG_STATES = {
-    RegistrationStates.NAME: Message.Registration.NAME,
-    RegistrationStates.DATE_OF_BIRTH: Message.Registration.DATE_OF_BIRTH,
-    RegistrationStates.PHONE_NUMBER: Message.Registration.PHONE_NUMBER,
-    RegistrationStates.MAIL: Message.Registration.MAIL,
-    RegistrationStates.ADDRESS: Message.Registration.ADDRESS,
-    RegistrationStates.INSTITUTE: Message.Registration.INSTITUTE,
-    RegistrationStates.COURSE_NUMBER: Message.Registration.COURSE_NUMBER,
-    RegistrationStates.VUS: Message.Registration.VUS,
-    RegistrationStates.DIRECTION_OF_STUDY: Message.Registration.DIRECTION_OF_STUDY,
-    RegistrationStates.GROUP_STUDY: Message.Registration.GROUP_STUDY,
-    RegistrationStates.FINAL: Message.Registration.FINAL,
-}
-
-if __name__ == '__main__':
-    s = RegistrationStates(1)
+REGISTRATION_HANDLERS = hw.get_handlers()
