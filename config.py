@@ -12,8 +12,8 @@ LEN_TOKEN = 25
 MAX_AMOUNT_TOKEN = 100
 # Если False, то бот, не будет записывать в логи то, что пишет пользователь
 LOG_MODE = True
-# Максимальный размер логов
-MAX_SIZE_MB_LOG = 1
+# Максимальный размер логов для отдельного юзера!
+MAX_SIZE_KB_LOG = 500
 PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
 ENUM_TYPE_TOKEN = ('Командир отделения', 'Командир взвода', 'Студент')
 
@@ -24,7 +24,9 @@ class Commands:
     REG = 'reg'
     SELF = 'self'
     GET_TOKEN = 'get_token'
-    STOP_PROCESS = 'stop_process'
+    STOP_PROCESS = 'stop'
+    # Пока что не реализована
+    LATE = 'late'
 
 
 class Message:

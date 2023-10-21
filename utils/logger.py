@@ -1,11 +1,11 @@
 import datetime
 import os
 
-from config import LOG_MODE, MAX_SIZE_MB_LOG, PATH_TO_LOG_DIR
+from config import LOG_MODE, MAX_SIZE_KB_LOG, PATH_TO_LOG_DIR
 
 
 def _get_max_size_log():
-    return MAX_SIZE_MB_LOG * 1024 ** 2
+    return MAX_SIZE_KB_LOG * 1024
 
 
 def _clear_logs_file(file):
