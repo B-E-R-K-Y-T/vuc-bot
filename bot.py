@@ -15,18 +15,17 @@ from utils.fsm.get_token.validators import GET_TOKEN_VALIDATORS
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
 security = Security(bot=bot, debug=False)
 fsm = {}
-LOG_MODE = False
 
 
 @bot.message_handler(commands=[Commands.START, Commands.HELP])
-@log(LOG_MODE)
+@log
 @save_user
 def send_welcome(message):
     bot.send_message(message.chat.id, Message.WELCOME)
 
 
 @bot.message_handler(commands=[Commands.REG])
-@log(LOG_MODE)
+@log
 @save_user
 def command_reg(message):
     bot.reply_to(message, Message.Registration.WARNING)
@@ -41,19 +40,19 @@ def command_reg(message):
 
 
 @bot.message_handler(commands=[Commands.GET_TOKEN])
-@log(LOG_MODE)
+@log
 @save_user
 @security.is_login
 def command_get_token(message):
     if is_admin(get_telegram_id(message)):
-        bot.send_message(message.chat.id, Message.GetToken.AMOUNT_TOKEN)
+        bot.send_message(message.chat.id, Message.GetToken.TYPE_TOKEN)
         state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
         state.next_state()
         fsm[get_telegram_id(message)] = state
 
 
 @bot.message_handler(commands=[Commands.STOP_PROCESS])
-@log(LOG_MODE)
+@log
 @save_user
 @security.is_login
 def command_stop_process(message):
@@ -63,7 +62,7 @@ def command_stop_process(message):
 
 
 @bot.message_handler(commands=[Commands.SELF])
-@log(LOG_MODE)
+@log
 @save_user
 @security.is_login
 def command_stop_process(message):
@@ -71,7 +70,7 @@ def command_stop_process(message):
 
 
 @bot.message_handler(func=lambda m: True)
-@log(LOG_MODE)
+@log
 @save_user
 @security.is_login
 def handler_message(message):
@@ -87,28 +86,33 @@ def handler_message(message):
 
 def handler_registration(user, message):
     res = handler_state(user, message, RegistrationStates, REGISTRATION_VALIDATORS, REGISTRATION_MSG_STATES)
-    if res and res != RegistrationStates.FINAL:
+
+    if res:
         user.writer.next_data(message.text)
-    elif res == RegistrationStates.FINAL:
-        user.write_data()
+
+        if user.state == RegistrationStates.FINAL:
+            user.write_data()
 
 
 def handler_get_token(user, message):
-    if handler_state(user, message, GetTokenState, GET_TOKEN_VALIDATORS, GET_TOKEN_MSG_STATES):
-        tokens = ''
-        amount = int(message.text)
+    res = handler_state(user, message, GetTokenState, GET_TOKEN_VALIDATORS, GET_TOKEN_MSG_STATES)
 
-        for number in range(amount):
-            tokens += f'{number + 1}) {get_token()}\n\n'
+    if res:
+        if user.state == GetTokenState.FINAL:
+            tokens = ''
+            amount = int(message.text)
 
-        bot.send_message(get_telegram_id(message), tokens)
+            for number in range(amount):
+                tokens += f'{number + 1}) {get_token()}\n\n'
+
+            bot.send_message(get_telegram_id(message), tokens)
 
 
 def handler_state(user, message, state, validators, msg_states) -> bool:
     if user.state == state.FINAL:
         user.state = None
 
-        return state.FINAL
+        return False
     else:
         try:
             validators[get_user(get_telegram_id(message)).state](message.text)

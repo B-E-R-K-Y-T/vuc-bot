@@ -42,7 +42,7 @@ class GroupStudyException(MainException):
     pass
 
 
-class AmountTokenException(MainException):
+class TokenException(MainException):
     pass
 
 

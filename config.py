@@ -10,7 +10,12 @@ MINIUM_AGE_ENTRANCE = 18
 LEN_TOKEN = 25
 # Максимальное кол-во токенов(Больше ставить не рекомендуется)
 MAX_AMOUNT_TOKEN = 100
-
+# Если False, то бот, не будет записывать в логи то, что пишет пользователь
+LOG_MODE = True
+# Максимальный размер логов
+MAX_SIZE_MB_LOG = 1
+PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
+ENUM_TYPE_TOKEN = ('Командир отделения', 'Командир взвода', 'Студент')
 
 class Commands:
     START = 'start'
@@ -45,6 +50,7 @@ class Message:
         FINAL = 'Регистрация окончена. Сохраняю данные'
 
     class GetToken:
+        TYPE_TOKEN = f'Для кого Вы хотите сгенерировать токены?\n\n{ENUM_TYPE_TOKEN}'
         AMOUNT_TOKEN = 'Сколько токенов сгенерировать?'
         FINAL = 'Токены готовы!'
 
@@ -64,3 +70,4 @@ class Message:
         SQUAD = 'Номер отделения должен состоять из цифр!'
         AMOUNT_TOKEN = 'Введите количество токенов цифрой!'
         AMOUNT_TOKEN_MAX = f'Можно указать только от 1 до {MAX_AMOUNT_TOKEN} токенов!'
+        TYPE_TOKEN = f'Тип токена может быть только таким: {ENUM_TYPE_TOKEN}'
