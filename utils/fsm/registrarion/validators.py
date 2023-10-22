@@ -7,7 +7,7 @@ from utils.exceptions import NameException, DateException, PhoneException, MailE
     PlatoonException, SquadException
 from datetime import datetime
 from utils.fsm.validators_worker import ValidatorWorker
-from utils.fsm.registrarion.state import RegistrationStates
+from utils.fsm.registrarion.states import RegistrationStates
 
 vw = ValidatorWorker()
 

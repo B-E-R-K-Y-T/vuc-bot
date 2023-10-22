@@ -1,6 +1,6 @@
 from config import Message, MAX_AMOUNT_TOKEN, ENUM_TYPE_TOKEN
 from utils.fsm.validators_worker import ValidatorWorker
-from utils.fsm.get_token.state import GetTokenState
+from utils.fsm.get_token.states import GetTokenState
 from utils.exceptions import TokenException
 
 vw = ValidatorWorker()

@@ -1,4 +1,4 @@
-from utils.fsm.registrarion.state import STATE
+from utils.fsm.registrarion.states import STATE
 
 
 class FiniteStateMachineRegistration:

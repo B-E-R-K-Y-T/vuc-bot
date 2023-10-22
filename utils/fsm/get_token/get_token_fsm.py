@@ -1,4 +1,4 @@
-from utils.fsm.get_token.state import STATE
+from utils.fsm.get_token.states import STATE
 
 
 class FiniteStateMachineGetToken:

@@ -2,7 +2,7 @@ import telebot
 
 from config import TELEGRAM_BOT_TOKEN, Message, Commands
 from utils.fsm.fsm_worker import FSMWorker
-from utils.fsm.registrarion.state import REGISTRATION_MSG_STATES, RegistrationStates
+from utils.fsm.registrarion.states import REGISTRATION_MSG_STATES, RegistrationStates
 from utils.security.security import Security, get_token
 from utils.logger import log
 from utils.server_worker.server_worker import ServerWorker
@@ -11,7 +11,7 @@ from utils.fsm.registrarion.registration_fsm import FiniteStateMachineRegistrati
 from utils.fsm.registrarion.validators import REGISTRATION_VALIDATORS
 from utils.exceptions import MainException
 from utils.fsm.get_token.get_token_fsm import FiniteStateMachineGetToken
-from utils.fsm.get_token.state import GET_TOKEN_MSG_STATES, GetTokenState
+from utils.fsm.get_token.states import GET_TOKEN_MSG_STATES, GetTokenState
 from utils.fsm.get_token.validators import GET_TOKEN_VALIDATORS
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
@@ -65,7 +65,7 @@ def command_get_token(message):
 def command_stop_process(message):
     get_user(get_telegram_id(message)).state = None
 
-    bot.reply_to(message, Message.STOP_PROCESS)
+    bot.reply_to(message, Message.EXIT_PROCESS)
 
 
 @bot.message_handler(commands=[Commands.SELF])
