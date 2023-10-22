@@ -1,11 +1,7 @@
 from utils.fsm.registrarion.states import STATE
+from utils.fsm.base_fsm import BaseFiniteStateMachine
 
 
-class FiniteStateMachineRegistration:
+class FiniteStateMachineRegistration(BaseFiniteStateMachine):
     def __init__(self, user):
-        self.user = user
-        self.states = STATE
-        self.iter_states = iter(self.states)
-
-    def next_state(self):
-        self.user.state = next(self.iter_states)
+        super().__init__(user, STATE)

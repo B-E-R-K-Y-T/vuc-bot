@@ -15,7 +15,7 @@ def validator_amount_token(text: str):
 
 
 @vw.save_validator(GetTokenState.TYPE_TOKEN)
-def validator_amount_token(text: str):
+def validator_type_token(text: str):
     if text.capitalize() not in ENUM_TYPE_TOKEN:
         raise TokenException(Message.Error.TYPE_TOKEN)
 
