@@ -10,4 +10,4 @@ class ServerWorker:
     def send_request(self, url):
         res = requests.get(url=f'{self.address}{url}')
         print(res, res.text)
-
+        return res

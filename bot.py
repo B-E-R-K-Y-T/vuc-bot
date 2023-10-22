@@ -81,8 +81,8 @@ def command_self(message):
 @save_user
 @security.is_login
 def command_late(message):
-    server_worker.send_request('/test')
-    # bot.reply_to(message, get_user(get_telegram_id(message)))
+    res = server_worker.send_request('/test')
+    bot.reply_to(message, res)
 
 
 @bot.message_handler(func=lambda m: True)

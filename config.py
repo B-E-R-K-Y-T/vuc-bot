@@ -18,7 +18,7 @@ PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
 ENUM_TYPE_TOKEN = ('Командир отделения', 'Командир взвода', 'Студент')
 # Режим дебага. Никаких ролей и безопасности
 DEBUG = True
-CRUD_ADDRESS = 'http://127.0.0.1:5000'
+CRUD_ADDRESS = os.getenv('CRUD_ADDRESS')
 
 
 class Commands:
