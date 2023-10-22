@@ -5,6 +5,7 @@ from utils.fsm.fsm_worker import FSMWorker
 from utils.fsm.registrarion.state import REGISTRATION_MSG_STATES, RegistrationStates
 from utils.security.security import Security, get_token
 from utils.logger import log
+from utils.server_worker.server_worker import ServerWorker
 from utils.user_worker.user import save_user, get_telegram_id, get_user
 from utils.fsm.registrarion.registration_fsm import FiniteStateMachineRegistration
 from utils.fsm.registrarion.validators import REGISTRATION_VALIDATORS
@@ -16,6 +17,7 @@ from utils.fsm.get_token.validators import GET_TOKEN_VALIDATORS
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
 security = Security(bot=bot)
 fsm_worker = FSMWorker()
+server_worker = ServerWorker()
 
 
 @bot.message_handler(commands=[Commands.START, Commands.HELP])
@@ -71,6 +73,15 @@ def command_stop_process(message):
 @security.is_login
 def command_self(message):
     bot.reply_to(message, get_user(get_telegram_id(message)))
+
+
+@bot.message_handler(commands=[Commands.LATE])
+@log
+@save_user
+@security.is_login
+def command_late(message):
+    server_worker.send_request('/test')
+    # bot.reply_to(message, get_user(get_telegram_id(message)))
 
 
 @bot.message_handler(func=lambda m: True)
