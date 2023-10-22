@@ -28,6 +28,7 @@ class Commands:
     SELF = 'self'
     GET_TOKEN = 'token'
     ROLLBACK_PROCESS = 'rollback'
+    CANCEL_STEP_PROCESS = 'cancel'
     # Пока что не реализованы
     LATE = 'late'
     ADD_ADMIN = 'add_admin'
@@ -41,6 +42,7 @@ class Message:
     ACCESS_DENIED = f'Вы не имеете доступ! Попробуйте получить токен у администратора!'
     DEFAULT = 'Я не понимаю Вас.'
     EXIT_PROCESS = 'Вы вышли из процесса.'
+    CANCEL_STEP_PROCESS = 'Действие отменено.'
 
     class Registration:
         WARNING = 'Отправляя данные, Вы даете согласие на их обработку, хранение и анализ.'
@@ -80,3 +82,4 @@ class Message:
         AMOUNT_TOKEN = 'Введите количество токенов цифрой!'
         AMOUNT_TOKEN_MAX = f'Можно указать только от 1 до {MAX_AMOUNT_TOKEN} токенов!'
         TYPE_TOKEN = f'Тип токена может быть только таким: {ENUM_TYPE_TOKEN}'
+        NOTHING_CANCEL_STEP_PROCESS = f'Нечего отменять.'

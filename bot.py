@@ -36,7 +36,7 @@ def command_reg(message):
     bot.send_message(message.chat.id, Message.Registration.NAME)
 
     state = FiniteStateMachineRegistration(get_user(get_telegram_id(message)))
-    state.next_state()
+    # state.next_state()
 
     get_user(get_telegram_id(message)).writer.data = []
 
@@ -51,7 +51,6 @@ def command_get_token(message):
     if security.is_admin(get_telegram_id(message)):
         bot.send_message(message.chat.id, Message.GetToken.TYPE_TOKEN)
         state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
-        state.next_state()
 
         fsm_worker.set_fsm_obj(get_telegram_id(message), state)
     else:
@@ -85,12 +84,30 @@ def command_late(message):
     bot.reply_to(message, res)
 
 
+@bot.message_handler(commands=[Commands.CANCEL_STEP_PROCESS])
+@log
+@save_user
+@security.is_login
+def command_cancel(message):
+    fsm_attr_user = fsm_worker.get_fsm_obj(get_telegram_id(message))
+
+    if fsm_attr_user is not None:
+        if fsm_attr_user.step > 0:
+            fsm_attr_user.old_state()
+
+            bot.reply_to(message, Message.CANCEL_STEP_PROCESS)
+    else:
+        bot.reply_to(message, Message.Error.NOTHING_CANCEL_STEP_PROCESS)
+
+
 @bot.message_handler(func=lambda m: True)
 @log
 @save_user
 @security.is_login
 def handler_message(message):
     user = get_user(get_telegram_id(message))
+
+    print(user.state)
 
     if isinstance(user.state, RegistrationStates):
         handler_registration(user, message)
