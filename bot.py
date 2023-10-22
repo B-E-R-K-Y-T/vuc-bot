@@ -30,6 +30,7 @@ def send_welcome(message):
 @bot.message_handler(commands=[Commands.REG])
 @log
 @save_user
+@security.is_login
 def command_reg(message):
     bot.reply_to(message, Message.Registration.WARNING)
     bot.send_message(message.chat.id, Message.Registration.NAME)

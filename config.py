@@ -28,8 +28,11 @@ class Commands:
     SELF = 'self'
     GET_TOKEN = 'token'
     ROLLBACK_PROCESS = 'rollback'
-    # Пока что не реализована
+    # Пока что не реализованы
     LATE = 'late'
+    ADD_ADMIN = 'add_admin'
+    DELETE_ADMIN = 'del_admin'
+    LOGIN = 'login'
 
 
 class Message:

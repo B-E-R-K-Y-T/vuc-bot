@@ -7,7 +7,7 @@ from config import LOG_MODE, MAX_SIZE_KB_LOG, PATH_TO_LOG_DIR
 def log(func):
     def wrapper(message, *args, **kwargs):
         if LOG_MODE:
-            path = f'{PATH_TO_LOG_DIR}\\{message.from_user.username}_{message.chat.id}.txt'
+            path = f'{PATH_TO_LOG_DIR}{_get_path_sep()}{message.from_user.username}_{message.chat.id}.txt'
             _create_logs_if_not_exists()
 
             text = f'TIME: {datetime.datetime.now()}: \n\tMSG_FROM_USER: {message.text}\n'
@@ -37,3 +37,15 @@ def _clear_logs_file(file):
 def _create_logs_if_not_exists():
     if not os.path.exists(PATH_TO_LOG_DIR):
         os.mkdir(PATH_TO_LOG_DIR)
+
+
+def _get_path_sep():
+    if os.name == 'posix':
+        return '/'
+    elif os.name == 'nt':
+        return '\\'
+
+
+__all__ = (
+    log.__name__,
+)
