@@ -90,12 +90,16 @@ def command_late(message):
 @security.is_login
 def command_cancel(message):
     fsm_attr_user = fsm_worker.get_fsm_obj(get_telegram_id(message))
+    user = get_user(get_telegram_id(message))
 
     if fsm_attr_user is not None:
-        if fsm_attr_user.step > 0:
+        if fsm_attr_user.step > -1:
             fsm_attr_user.old_state()
 
             bot.reply_to(message, Message.CANCEL_STEP_PROCESS)
+        else:
+            user.state = None
+            bot.reply_to(message, Message.Error.NOTHING_CANCEL_STEP_PROCESS)
     else:
         bot.reply_to(message, Message.Error.NOTHING_CANCEL_STEP_PROCESS)
 
