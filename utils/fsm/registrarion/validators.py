@@ -12,7 +12,7 @@ from utils.fsm.registrarion.states import RegistrationStates
 vw = ValidatorWorker()
 
 
-@vw.save_validator(RegistrationStates.NAME)
+@vw.attach_validator(RegistrationStates.NAME)
 def validator_name_state(text: str):
     text = text.split(' ')
 
@@ -24,7 +24,7 @@ def validator_name_state(text: str):
                 raise NameException(Message.Error.NAME_DIGIT)
 
 
-@vw.save_validator(RegistrationStates.DATE_OF_BIRTH)
+@vw.attach_validator(RegistrationStates.DATE_OF_BIRTH)
 def validator_date_of_birth(text: str):
     text = [int(i) for i in text.split('.') if i.isnumeric()]
 
@@ -41,7 +41,7 @@ def validator_date_of_birth(text: str):
             raise DateException(Message.Error.DATE)
 
 
-@vw.save_validator(RegistrationStates.PHONE_NUMBER)
+@vw.attach_validator(RegistrationStates.PHONE_NUMBER)
 def validator_phone_number(text: str):
     text = text.replace(' ', '')
 
@@ -49,13 +49,13 @@ def validator_phone_number(text: str):
         raise PhoneException(Message.Error.PHONE)
 
 
-@vw.save_validator(RegistrationStates.MAIL)
+@vw.attach_validator(RegistrationStates.MAIL)
 def validator_mail(text: str):
     if not re.fullmatch(pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', string=text):
         raise MailException(Message.Error.MAIL)
 
 
-@vw.save_validator(RegistrationStates.ADDRESS)
+@vw.attach_validator(RegistrationStates.ADDRESS)
 def validator_address(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
@@ -64,7 +64,7 @@ def validator_address(text: str):
         raise AddressException(Message.Error.ADDRESS)
 
 
-@vw.save_validator(RegistrationStates.INSTITUTE)
+@vw.attach_validator(RegistrationStates.INSTITUTE)
 def validator_institute(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
@@ -73,7 +73,7 @@ def validator_institute(text: str):
         raise InstituteException(Message.Error.INSTITUTE)
 
 
-@vw.save_validator(RegistrationStates.DIRECTION_OF_STUDY)
+@vw.attach_validator(RegistrationStates.DIRECTION_OF_STUDY)
 def validator_direction_of_study(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
@@ -82,7 +82,7 @@ def validator_direction_of_study(text: str):
         raise DirectionOfStudyException(Message.Error.DIRECTION_OF_STUDY)
 
 
-@vw.save_validator(RegistrationStates.GROUP_STUDY)
+@vw.attach_validator(RegistrationStates.GROUP_STUDY)
 def validator_group_study(text: str):
     for symbol in text:
         if symbol not in string.punctuation and not symbol.isdigit():
@@ -91,7 +91,7 @@ def validator_group_study(text: str):
         raise GroupStudyException(Message.Error.GROUP_STUDY)
 
 
-@vw.save_validator(RegistrationStates.COURSE_NUMBER)
+@vw.attach_validator(RegistrationStates.COURSE_NUMBER)
 def validator_course_number(text: str):
     if not text.isnumeric():
         raise CourseNumberException(Message.Error.COURSE_NUMBER)
@@ -99,19 +99,19 @@ def validator_course_number(text: str):
         raise CourseNumberException(Message.Error.COURSE_NUMBER)
 
 
-@vw.save_validator(RegistrationStates.VUS)
+@vw.attach_validator(RegistrationStates.VUS)
 def validator_vus(text: str):
     if not text.isnumeric():
         raise VusException(Message.Error.VUS)
 
 
-@vw.save_validator(RegistrationStates.PLATOON)
+@vw.attach_validator(RegistrationStates.PLATOON)
 def validator_platoon(text: str):
     if not text.isnumeric() and len(text) == 3:
         raise PlatoonException(Message.Error.PLATOON)
 
 
-@vw.save_validator(RegistrationStates.SQUAD)
+@vw.attach_validator(RegistrationStates.SQUAD)
 def validator_squad(text: str):
     if not text.isnumeric():
         raise SquadException(Message.Error.SQUAD)

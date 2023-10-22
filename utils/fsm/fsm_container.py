@@ -1,4 +1,4 @@
-class FSMWorker:
+class FSMContainer:
     def __init__(self):
         self.fsm = {}
 

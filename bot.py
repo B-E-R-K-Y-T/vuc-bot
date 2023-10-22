@@ -1,7 +1,7 @@
 import telebot
 
 from config import TELEGRAM_BOT_TOKEN, Message, Commands
-from utils.fsm.fsm_worker import FSMWorker
+from utils.fsm.fsm_container import FSMContainer
 from utils.fsm.registrarion.states import REGISTRATION_MSG_STATES, RegistrationStates
 from utils.security.security import Security, get_token
 from utils.logger import log
@@ -16,7 +16,7 @@ from utils.fsm.get_token.validators import GET_TOKEN_VALIDATORS
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
 security = Security(bot=bot)
-fsm_worker = FSMWorker()
+fsm_worker = FSMContainer()
 server_worker = ServerWorker()
 
 

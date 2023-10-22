@@ -6,7 +6,7 @@ from utils.exceptions import TokenException
 vw = ValidatorWorker()
 
 
-@vw.save_validator(GetTokenState.AMOUNT_TOKEN)
+@vw.attach_validator(GetTokenState.AMOUNT_TOKEN)
 def validator_amount_token(text: str):
     if not text.isnumeric():
         raise TokenException(Message.Error.AMOUNT_TOKEN)
@@ -14,7 +14,7 @@ def validator_amount_token(text: str):
         raise TokenException(Message.Error.AMOUNT_TOKEN_MAX)
 
 
-@vw.save_validator(GetTokenState.TYPE_TOKEN)
+@vw.attach_validator(GetTokenState.TYPE_TOKEN)
 def validator_type_token(text: str):
     if text.capitalize() not in ENUM_TYPE_TOKEN:
         raise TokenException(Message.Error.TYPE_TOKEN)

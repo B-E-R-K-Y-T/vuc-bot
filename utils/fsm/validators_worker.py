@@ -2,7 +2,7 @@ class ValidatorWorker:
     def __init__(self):
         self.validators = {}
 
-    def save_validator(self, state):
+    def attach_validator(self, state):
         def decorator(validator: callable):
             self.validators[state] = validator
 
