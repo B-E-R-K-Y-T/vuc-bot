@@ -1,5 +1,5 @@
-from config import Message, ADMINS_ID, DEBUG
-from utils.server_worker.server_worker import ServerWorker
+from config import Message, DEBUG
+from utils.server_worker.server_worker import ServerWorker, Status
 
 
 class Security:
@@ -11,8 +11,11 @@ class Security:
             if DEBUG:
                 return func(message, *args, **kwargs)
 
-            if (message.chat.id in ServerWorker().get_login_users() or
-                message.chat.id in ServerWorker().get_admin_users()):
+            login_users = ServerWorker().get_login_users()
+            admin_users = ServerWorker().get_admin_users()
+
+            if (message.chat.id in login_users or
+                message.chat.id in admin_users):
                 return func(message, *args, **kwargs)
             else:
                 self.bot.reply_to(message, Message.ACCESS_DENIED)
@@ -30,7 +33,3 @@ class Security:
                 self.bot.reply_to(message, Message.ACCESS_DENIED)
 
         return wrapper
-
-
-def _save_token_to_db(token, telegram_id):
-    ...

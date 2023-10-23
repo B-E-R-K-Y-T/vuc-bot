@@ -94,6 +94,7 @@ class Message:
         DEFAULT_ERROR = 'Ошибка!'
         ERROR_LEN_TOKEN = 'Длина токена должна быть: '  # Потом я конкатенирую сюда длину
         TOKEN_IS_BUSY = 'Данный токен уже занят!'
+        CONNECTION_ERROR = 'Нет соединения с сервером!'
 
 
 class EndPoint:

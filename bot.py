@@ -7,7 +7,7 @@ from utils.fsm.login.states import LoginState, LOGIN_MSG_STATES
 from utils.fsm.registrarion.states import REGISTRATION_MSG_STATES, RegistrationStates
 from utils.security.security import Security
 from utils.logger import log
-from utils.server_worker.server_worker import ServerWorker, Status
+from utils.server_worker.server_worker import ServerWorker, Status, check_connection_with_server
 from utils.user_worker.user import save_user, get_telegram_id, get_user
 from utils.fsm.registrarion.registration_fsm import FiniteStateMachineRegistration
 from utils.fsm.registrarion.validators import REGISTRATION_VALIDATORS
@@ -33,6 +33,7 @@ def send_welcome(message):
 
 @bot.message_handler(commands=[Commands.REG])
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
 def command_reg(message):
@@ -49,6 +50,7 @@ def command_reg(message):
 
 @bot.message_handler(commands=[Commands.GET_TOKEN])
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
 @security.is_admin
@@ -61,6 +63,7 @@ def command_get_token(message):
 
 @bot.message_handler(commands=[Commands.ROLLBACK_PROCESS])
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
 def command_stop_process(message):
@@ -71,6 +74,7 @@ def command_stop_process(message):
 
 @bot.message_handler(commands=[Commands.SELF])
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
 def command_self(message):
@@ -79,6 +83,7 @@ def command_self(message):
 
 @bot.message_handler(commands=[Commands.BAN_USER])
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
 @security.is_admin
@@ -97,6 +102,7 @@ def command_ban_user(message):
 
 @bot.message_handler(commands=[Commands.CANCEL_STEP_PROCESS])
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
 def command_cancel(message):
@@ -128,6 +134,7 @@ def command_login(message):
 
 @bot.message_handler(func=lambda m: True)
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 def handler_message_loging_proces(message):
     user = get_user(get_telegram_id(message))
@@ -140,6 +147,7 @@ def handler_message_loging_proces(message):
 
 @bot.message_handler(func=lambda m: True)
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
 def handler_message(message):

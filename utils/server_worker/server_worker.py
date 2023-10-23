@@ -1,7 +1,19 @@
 import requests
 
 from enum import auto, Enum, unique
-from config import CRUD_ADDRESS, EndPoint
+from config import CRUD_ADDRESS, EndPoint, Message
+
+
+def _check_connection(func):
+    def wrapper(*args, **kwargs):
+        try:
+            res = func(*args, **kwargs)
+        except requests.exceptions.ConnectionError as e:
+            return Status.ERROR
+        else:
+            return res
+
+    return wrapper
 
 
 @unique
@@ -60,6 +72,28 @@ class ServerWorker:
             return Status.OK
         else:
             return Status.ERROR
+
+    def test_connection(self):
+        res = requests.get(url=f'{self.address}/')
+
+        if res.status_code == 200:
+            return Status.OK
+        else:
+            return Status.ERROR
+
+
+def check_connection_with_server(bot):
+    def decorator(func):
+        def wrapper(message, *args, **kwargs):
+            res = ServerWorker().test_connection()
+
+            if res == Status.OK:
+                return func(message, *args, **kwargs)
+            else:
+                bot.reply_to(message, Message.Error.CONNECTION_ERROR)
+
+        return wrapper
+    return decorator
 
 
 if __name__ == '__main__':
