@@ -2,13 +2,16 @@ import telebot
 
 from config import TELEGRAM_BOT_TOKEN, Message, Commands
 from utils.fsm.fsm_container import FSMContainer
+from utils.fsm.login.login_fsm import FiniteStateMachineLogin
+from utils.fsm.login.states import LoginState, LOGIN_MSG_STATES
 from utils.fsm.registrarion.states import REGISTRATION_MSG_STATES, RegistrationStates
 from utils.security.security import Security
 from utils.logger import log
-from utils.server_worker.server_worker import ServerWorker
+from utils.server_worker.server_worker import ServerWorker, Status
 from utils.user_worker.user import save_user, get_telegram_id, get_user
 from utils.fsm.registrarion.registration_fsm import FiniteStateMachineRegistration
 from utils.fsm.registrarion.validators import REGISTRATION_VALIDATORS
+from utils.fsm.login.validators import LOGIN_VALIDATORS
 from utils.exceptions import MainException
 from utils.fsm.get_token.get_token_fsm import FiniteStateMachineGetToken
 from utils.fsm.get_token.states import GET_TOKEN_MSG_STATES, GetTokenState
@@ -48,14 +51,12 @@ def command_reg(message):
 @log
 @save_user
 @security.is_login
+@security.is_admin
 def command_get_token(message):
-    if security.is_admin(get_telegram_id(message)):
-        bot.send_message(message.chat.id, Message.GetToken.TYPE_TOKEN)
-        state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
+    bot.send_message(message.chat.id, Message.GetToken.TYPE_TOKEN)
+    state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
 
-        fsm_worker.set_fsm_obj(get_telegram_id(message), state)
-    else:
-        bot.reply_to(message, Message.ACCESS_DENIED)
+    fsm_worker.set_fsm_obj(get_telegram_id(message), state)
 
 
 @bot.message_handler(commands=[Commands.ROLLBACK_PROCESS])
@@ -76,12 +77,22 @@ def command_self(message):
     bot.reply_to(message, get_user(get_telegram_id(message)))
 
 
-@bot.message_handler(commands=[Commands.LATE])
+@bot.message_handler(commands=[Commands.BAN_USER])
 @log
 @save_user
 @security.is_login
-def command_late(message):
-    ...
+@security.is_admin
+def command_ban_user(message):
+    try:
+        _, user_id = message.text.split(Commands.Flags.Ban.USER)
+        res = ServerWorker().ban_user(user_id)
+
+        if res == Status.OK:
+            bot.reply_to(message, Message.SUCCESSFUL)
+        else:
+            bot.reply_to(message, Message.Error.DEFAULT_ERROR)
+    except Exception as e:
+        bot.reply_to(message, e)
 
 
 @bot.message_handler(commands=[Commands.CANCEL_STEP_PROCESS])
@@ -104,6 +115,29 @@ def command_cancel(message):
         bot.reply_to(message, Message.Error.NOTHING_CANCEL_STEP_PROCESS)
 
 
+@bot.message_handler(commands=[Commands.LOGIN])
+@log
+@save_user
+def command_login(message):
+    bot.send_message(message.chat.id, Message.Login.LOGIN)
+
+    state = FiniteStateMachineLogin(get_user(get_telegram_id(message)))
+
+    fsm_worker.set_fsm_obj(get_telegram_id(message), state)
+
+
+@bot.message_handler(func=lambda m: True)
+@log
+@save_user
+def handler_message_loging_proces(message):
+    user = get_user(get_telegram_id(message))
+
+    if isinstance(user.state, LoginState):
+        handler_login(user, message)
+    else:
+        security.is_login(handler_message)(message)
+
+
 @bot.message_handler(func=lambda m: True)
 @log
 @save_user
@@ -111,7 +145,7 @@ def command_cancel(message):
 def handler_message(message):
     user = get_user(get_telegram_id(message))
 
-    print(user.state)
+    print(f'{user.state=}')
 
     if isinstance(user.state, RegistrationStates):
         handler_registration(user, message)
@@ -139,12 +173,29 @@ def handler_get_token(user, message):
             token_handler.set_role_to_token(message.text)
         elif user.state == GetTokenState.FINAL:
             token_handler.set_amount(int(message.text))
+
             msg = ''
 
             for offset, token in enumerate(ServerWorker().get_tokens(*token_handler.get_token_params())):
                 msg += f'{offset+1}) {token}\n\n'
 
             bot.send_message(get_telegram_id(message), msg)
+
+            user.state = None
+
+
+def handler_login(user, message):
+    res = handler_state(user, message, LoginState, LOGIN_VALIDATORS, LOGIN_MSG_STATES)
+
+    if res:
+        if user.state == LoginState.FINAL:
+            respond = ServerWorker().attach_token_to_user(get_telegram_id(message), message.text)
+
+            if respond == Status.OK:
+                bot.reply_to(message, Message.SUCCESSFUL)
+                user.state = None
+            else:
+                bot.reply_to(message, Message.Error.DEFAULT_ERROR)
 
 
 def handler_state(user, message, state, validators, msg_states) -> bool:

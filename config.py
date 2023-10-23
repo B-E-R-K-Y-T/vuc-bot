@@ -15,7 +15,7 @@ MAX_SIZE_KB_LOG = int(os.getenv('MAX_SIZE_KB_LOG'))
 PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
 ENUM_TYPE_TOKEN = ('Командир отделения', 'Командир взвода', 'Студент')
 # Режим дебага. Никаких ролей и безопасности
-DEBUG = True
+DEBUG = False
 CRUD_ADDRESS = os.getenv('CRUD_ADDRESS')
 
 
@@ -32,6 +32,11 @@ class Commands:
     ADD_ADMIN = 'add_admin'
     DELETE_ADMIN = 'del_admin'
     LOGIN = 'login'
+    BAN_USER = 'ban_user'
+
+    class Flags:
+        class Ban:
+            USER = '-u'
 
 
 class Message:
@@ -41,6 +46,7 @@ class Message:
     DEFAULT = 'Я не понимаю Вас.'
     EXIT_PROCESS = 'Вы вышли из процесса.'
     CANCEL_STEP_PROCESS = 'Действие отменено.'
+    SUCCESSFUL = 'Успешно!'
 
     class Registration:
         WARNING = 'Отправляя данные, Вы даете согласие на их обработку, хранение и анализ.'
@@ -63,6 +69,10 @@ class Message:
         AMOUNT_TOKEN = 'Сколько токенов сгенерировать?'
         FINAL = 'Токены готовы!'
 
+    class Login:
+        LOGIN = 'Введите токен: '
+        FINAL = 'Проверяю токен...'
+
     class Error:
         NAME = 'Не правильный ввод! Формат ввода такой: ИМЯ ФАМИЛИЯ ОТЧЕСТВО'
         NAME_DIGIT = 'Не правильный ввод! Фамилия имя или отчество не может состоять только из цифр'
@@ -81,8 +91,18 @@ class Message:
         AMOUNT_TOKEN_MAX = f'Можно указать только от 1 до {MAX_AMOUNT_TOKEN} токенов!'
         TYPE_TOKEN = f'Тип токена может быть только таким: {ENUM_TYPE_TOKEN}'
         NOTHING_CANCEL_STEP_PROCESS = f'Нечего отменять.'
+        DEFAULT_ERROR = 'Ошибка!'
+        ERROR_LEN_TOKEN = 'Длина токена должна быть: '  # Потом я конкатенирую сюда длину
+        TOKEN_IS_BUSY = 'Данный токен уже занят!'
 
 
 class EndPoint:
     TEST = '/test'
     GET_TOKEN = '/get_token'
+    GET_FREE_TOKEN = '/get_free_token'
+    GET_LOGINS = '/get_login_users'
+    GET_ADMINS = '/get_admins_users'
+    LOGIN = '/login'
+    ATTACH_TOKEN = '/attach_token'
+    BAN_USER = '/ban_user'
+    GET_LEN_TOKEN = '/get_len_token'
