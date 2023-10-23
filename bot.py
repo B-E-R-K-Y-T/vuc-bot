@@ -3,7 +3,7 @@ import telebot
 from config import TELEGRAM_BOT_TOKEN, Message, Commands
 from utils.fsm.fsm_container import FSMContainer
 from utils.fsm.registrarion.states import REGISTRATION_MSG_STATES, RegistrationStates
-from utils.security.security import Security, get_token
+from utils.security.security import Security
 from utils.logger import log
 from utils.server_worker.server_worker import ServerWorker
 from utils.user_worker.user import save_user, get_telegram_id, get_user
@@ -13,11 +13,12 @@ from utils.exceptions import MainException
 from utils.fsm.get_token.get_token_fsm import FiniteStateMachineGetToken
 from utils.fsm.get_token.states import GET_TOKEN_MSG_STATES, GetTokenState
 from utils.fsm.get_token.validators import GET_TOKEN_VALIDATORS
+from utils.handlers.token import TokenHandler
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
 security = Security(bot=bot)
 fsm_worker = FSMContainer()
-server_worker = ServerWorker()
+token_handler = TokenHandler()
 
 
 @bot.message_handler(commands=[Commands.START, Commands.HELP])
@@ -80,8 +81,7 @@ def command_self(message):
 @save_user
 @security.is_login
 def command_late(message):
-    res = server_worker.send_request('/test')
-    bot.reply_to(message, res)
+    ...
 
 
 @bot.message_handler(commands=[Commands.CANCEL_STEP_PROCESS])
@@ -135,14 +135,16 @@ def handler_get_token(user, message):
     res = handler_state(user, message, GetTokenState, GET_TOKEN_VALIDATORS, GET_TOKEN_MSG_STATES)
 
     if res:
-        if user.state == GetTokenState.FINAL:
-            tokens = ''
-            amount = int(message.text)
+        if user.state == GetTokenState.AMOUNT_TOKEN:
+            token_handler.set_role_to_token(message.text)
+        elif user.state == GetTokenState.FINAL:
+            token_handler.set_amount(int(message.text))
+            msg = ''
 
-            for number in range(amount):
-                tokens += f'{number + 1}) {get_token()}\n\n'
+            for offset, token in enumerate(ServerWorker().get_tokens(*token_handler.get_token_params())):
+                msg += f'{offset+1}) {token}\n\n'
 
-            bot.send_message(get_telegram_id(message), tokens)
+            bot.send_message(get_telegram_id(message), msg)
 
 
 def handler_state(user, message, state, validators, msg_states) -> bool:

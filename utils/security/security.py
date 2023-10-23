@@ -1,7 +1,4 @@
-import random
-import string
-
-from config import Message, ADMINS_ID, LEN_TOKEN, DEBUG
+from config import Message, ADMINS_ID, DEBUG
 
 
 class Security:
@@ -30,18 +27,6 @@ class Security:
             return True
         else:
             return False
-
-
-def get_token():
-    return _generate_token()
-
-
-def _generate_token():
-    length = LEN_TOKEN
-    alphabet = string.ascii_letters + string.digits
-
-    list_password = [random.choice(alphabet) for _ in range(length)]
-    return ''.join(list_password)
 
 
 def _save_token_to_db(token, telegram_id):

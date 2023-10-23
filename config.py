@@ -6,8 +6,6 @@ GOD_ID = os.getenv('GOD_ID')
 ADMINS_ID = tuple(int(t_id) for t_id in os.getenv('ADMINS_ID').split(',') if t_id.isnumeric())
 # Минимальный возраст поступления на военную кафедру
 MINIUM_AGE_ENTRANCE = int(os.getenv('MINIUM_AGE_ENTRANCE'))
-# Максимальная длина токена(Больше ставить не рекомендуется)
-LEN_TOKEN = int(os.getenv('LEN_TOKEN'))
 # Максимальное кол-во токенов(Больше ставить не рекомендуется)
 MAX_AMOUNT_TOKEN = int(os.getenv('MAX_AMOUNT_TOKEN'))
 # Если False, то бот, не будет записывать в логи то, что пишет пользователь
@@ -83,3 +81,8 @@ class Message:
         AMOUNT_TOKEN_MAX = f'Можно указать только от 1 до {MAX_AMOUNT_TOKEN} токенов!'
         TYPE_TOKEN = f'Тип токена может быть только таким: {ENUM_TYPE_TOKEN}'
         NOTHING_CANCEL_STEP_PROCESS = f'Нечего отменять.'
+
+
+class EndPoint:
+    TEST = '/test'
+    GET_TOKEN = '/get_token'

@@ -1,9 +1,12 @@
+import uuid
+
 users = {}
 
 
 class User:
     def __init__(self, telegram_id: int):
         self.writer = WriterData()
+        self.__id = uuid.uuid4()
         self.__telegram_id = telegram_id
         self.__state = None
         self.name = None
@@ -18,6 +21,10 @@ class User:
         self.vus = None
         self.platoon = None
         self.squad = None
+
+        self.__all_data = (self.name, self.date_of_brith, self.phone_number, self.mail, self.address,
+                           self.institute, self.direction_of_study, self.group_study, self.course_number,
+                           self.vus, self.platoon, self.squad)
 
     @property
     def telegram_id(self):
@@ -39,6 +46,9 @@ class User:
         (self.name, self.date_of_brith, self.phone_number, self.mail, self.address,
          self.institute, self.direction_of_study, self.group_study, self.course_number,
          self.vus, self.platoon, self.squad) = self.writer.get_data()
+
+    def get_data(self):
+        return self.__all_data
 
     def __str__(self):
         res = (f'ФИО: {self.name}\n'
