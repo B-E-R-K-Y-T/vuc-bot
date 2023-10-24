@@ -14,7 +14,7 @@ LOG_MODE = True
 MAX_SIZE_KB_LOG = int(os.getenv('MAX_SIZE_KB_LOG'))
 PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
 ENUM_TYPE_TOKEN = ('Командир отделения', 'Командир взвода', 'Студент')
-# Режим дебага. Никаких ролей и безопасности
+# Режим дебага. Никаких ролей и безопасности(Если True, то он включен)
 DEBUG = False
 CRUD_ADDRESS = os.getenv('CRUD_ADDRESS')
 
@@ -40,8 +40,10 @@ class Commands:
 
 
 class Message:
-    WELCOME = (f'Приветствую Вас! Я бот ВУЦ РТУ МИРЭА который помогает в учебе! Чтобы начать регистрацию введите '
-               f'/{Commands.REG}')
+    WELCOME = (f'Приветствую Вас! Я бот ВУЦ РТУ МИРЭА который помогает в учебе! Если Вы тут впервые, расскажу, '
+               f'как начать со мной работать: '
+               f'\n\nДля начала введите токен: /{Commands.LOGIN}'
+               f'\nА теперь пройдите регистрацию: /{Commands.REG}')
     ACCESS_DENIED = f'Вы не имеете доступ! Попробуйте получить токен у администратора!'
     DEFAULT = 'Я не понимаю Вас.'
     EXIT_PROCESS = 'Вы вышли из процесса.'
@@ -66,7 +68,8 @@ class Message:
 
     class GetToken:
         TYPE_TOKEN = f'Для кого Вы хотите сгенерировать токены?\n\n{ENUM_TYPE_TOKEN}'
-        AMOUNT_TOKEN = 'Сколько токенов сгенерировать?'
+        AMOUNT_TOKEN = ('Сколько токенов сгенерировать?'
+                        '\n\nЖелательно генерировать строго под кол-во людей во взводе, чтобы не было путаницы.')
         FINAL = 'Токены готовы!'
 
     class Login:
@@ -93,8 +96,9 @@ class Message:
         NOTHING_CANCEL_STEP_PROCESS = f'Нечего отменять.'
         DEFAULT_ERROR = 'Ошибка!'
         ERROR_LEN_TOKEN = 'Длина токена должна быть: '  # Потом я конкатенирую сюда длину
-        TOKEN_IS_BUSY = 'Данный токен уже занят!'
+        INVALID_TOKEN = 'Токен недействителен!'
         CONNECTION_ERROR = 'Нет соединения с сервером!'
+        USER_ALREADY_EXISTS = 'Вы уже зарегистрированы!'
 
 
 class EndPoint:

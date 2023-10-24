@@ -197,6 +197,15 @@ def handler_login(user, message):
 
     if res:
         if user.state == LoginState.FINAL:
+            if get_telegram_id(message) in ServerWorker().get_login_users():
+                bot.reply_to(message, Message.Error.USER_ALREADY_EXISTS)
+                user.state = None
+                return
+            elif get_telegram_id(message) in ServerWorker().get_admin_users():
+                bot.reply_to(message, Message.Error.USER_ALREADY_EXISTS)
+                user.state = None
+                return
+
             respond = ServerWorker().attach_token_to_user(get_telegram_id(message), message.text)
 
             if respond == Status.OK:

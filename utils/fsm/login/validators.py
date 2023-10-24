@@ -14,7 +14,7 @@ def validator_login(text: str):
     if len(text) != max_len:
         raise TokenException(f'{Message.Error.ERROR_LEN_TOKEN}{max_len}')
     elif text not in ServerWorker().get_free_tokens():
-        raise TokenException(Message.Error.TOKEN_IS_BUSY)
+        raise TokenException(Message.Error.INVALID_TOKEN)
 
 
 LOGIN_VALIDATORS = vw.get_validators()
