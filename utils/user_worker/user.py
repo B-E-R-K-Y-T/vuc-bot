@@ -44,6 +44,9 @@ class User:
     def state(self, state):
         self.__state = state
 
+    def get_role(self):
+        return ServerWorker().get_role(self.__telegram_id)
+
     def write_data(self):
         print(self.writer.get_data())
         (self.name, self.date_of_brith, self.phone_number, self.mail, self.address,

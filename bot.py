@@ -1,3 +1,5 @@
+import datetime
+
 import telebot
 
 from telebot import types
@@ -46,15 +48,20 @@ def send_welcome(message):
 @security.is_login
 def command_get_platoon(message: types.Message):
     markup = InlineKeyboardMarkup()
-    platoon_number = get_user(get_telegram_id(message)).platoon
-    count_squad = ServerWorker().get_count_platoon_squad(platoon_number)
+    user = get_user(get_telegram_id(message))
 
-    events = [Commands.Events.GET_SQUAD_1, Commands.Events.GET_SQUAD_2, Commands.Events.GET_SQUAD_3]
+    if user.get_role() in [Role.COMMANDER_PLATOON, Role.COMMANDER_SQUAD]:
+        platoon_number = user.platoon
+        count_squad = ServerWorker().get_count_platoon_squad(platoon_number)
 
-    for squad_num in range(count_squad):
-        markup.add(InlineKeyboardButton(squad_num + 1, callback_data=events[squad_num]))
+        events = [Commands.Events.GET_SQUAD_1, Commands.Events.GET_SQUAD_2, Commands.Events.GET_SQUAD_3]
 
-    bot.send_message(chat_id=message.chat.id, text=Message.SELECT_SQUAD, reply_markup=markup)
+        for squad_num in range(count_squad):
+            markup.add(InlineKeyboardButton(squad_num + 1, callback_data=events[squad_num]))
+
+        bot.send_message(chat_id=message.chat.id, text=Message.SELECT_SQUAD, reply_markup=markup)
+    else:
+        bot.reply_to(message, Message.ACCESS_DENIED)
 
 
 @bot.message_handler(commands=[Commands.REG])
@@ -205,6 +212,26 @@ def squad_3(call: types.CallbackQuery):
     handler_select_squad(call, '3')
 
 
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.EditUser.ATTEND)
+def attend(call: types.CallbackQuery):
+    markup = InlineKeyboardMarkup()
+
+    markup.add(InlineKeyboardButton(Message.EditUser.ATTEND_NO, callback_data=Commands.Events.EditUser.ATTEND_NO))
+    markup.add(InlineKeyboardButton(Message.EditUser.ATTEND_YES, callback_data=Commands.Events.EditUser.ATTEND_YES))
+
+    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.id, reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.EditUser.ATTEND_NO)
+def attend_no(call: types.CallbackQuery):
+    ServerWorker().add_visit_user(datetime.date.today(), 0, listener_edit_user[get_telegram_id(call.message)])
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.EditUser.ATTEND_YES)
+def attend_no(call: types.CallbackQuery):
+    ServerWorker().add_visit_user(datetime.date.today(), 1, listener_edit_user[get_telegram_id(call.message)])
+
+
 @bot.callback_query_handler(func=lambda call: True)
 def handler_callbacks(call: types.CallbackQuery):
     if call.data in edit_users.keys():
@@ -223,7 +250,7 @@ def handler_edit_user(call):
     markup = InlineKeyboardMarkup()
 
     markup.add(InlineKeyboardButton(Message.EditUser.SQUAD, callback_data=Commands.Events.EditUser.SQUAD))
-    # markup.add(InlineKeyboardButton(Message.EditUser.ROLE, callback_data=Commands.Events.EditUser.ROLE))
+    markup.add(InlineKeyboardButton(Message.EditUser.ATTEND, callback_data=Commands.Events.EditUser.ATTEND))
 
     bot.send_message(chat_id=call.message.chat.id, text=Message.EditUser.MAIN, reply_markup=markup)
 

@@ -35,11 +35,11 @@ class Commands:
     CANCEL_STEP_PROCESS = 'cancel'
     LOGIN = 'login'
     BAN_USER = 'ban_user'
-    GET_ROLE = 'get_role'
     GET_PLATOON = 'get_platoon'
     ATTEND = 'attend'
     # TODO: Реализовать!
     LATE = 'late'
+    GET_ROLE = 'get_role'
     ADD_ADMIN = 'add_admin'
     DELETE_ADMIN = 'del_admin'
 
@@ -52,6 +52,8 @@ class Commands:
         class EditUser:
             SQUAD = 'edit_squad'
             ATTEND = 'edit_attend'
+            ATTEND_NO = 'edit_attend_no'
+            ATTEND_YES = 'edit_attend_yes'
             # TODO: Реализовать!
             ROLE = 'edit_role'
 
@@ -75,6 +77,9 @@ class Message:
     class EditUser:
         MAIN = 'Какой параметр Вы хотите поменять?'
         SQUAD = 'Отделение'
+        ATTEND = 'Присутствие'
+        ATTEND_NO = 'Отсутствует'
+        ATTEND_YES = 'Присутствует'
         ROLE = 'Должность'
 
     class EditSquadUserState:

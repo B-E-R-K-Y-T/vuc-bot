@@ -98,7 +98,7 @@ class ServerWorker:
         else:
             return Status.ERROR
 
-    def add_visit_user(self, date_v: str, visiting: int, telegram_id: int):
+    def add_visit_user(self, date_v, visiting: int, telegram_id: int):
         res = requests.get(url=f'{self.address}{EndPoint.UPDATE_ATTENDANCE_USER}',
                            params={'date_v': date_v, 'visiting': visiting, 'telegram_id': telegram_id,})
 

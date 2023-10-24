@@ -44,7 +44,7 @@ def create_user():
     ServerWorker().attach_token_to_user(t_id, gen_token())
     user = User(t_id)
     attrs = [generate_name(), '1.1.1901', '89168118457', 'test@test.ber', 'address', 'name_inst',
-             'dir_study', 'BSBO-08-19', 1, 541100, 5520, random.randint(1, 3)]
+             'dir_study', 'BSBO-08-19', 1, 541100, 552, random.randint(1, 3)]
 
     for attr in attrs:
         user.writer.next_data(attr)
