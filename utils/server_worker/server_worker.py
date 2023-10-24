@@ -26,12 +26,40 @@ class ServerWorker:
     def __init__(self):
         self.address = CRUD_ADDRESS
 
-    def get_tokens(self, amount, role):
+    def get_tokens(self, amount: int, role: str):
         res = requests.get(url=f'{self.address}{EndPoint.GET_TOKEN}',
                            params={'amount': amount, 'role': role})
 
         if res.status_code == 200:
             return [token for token in res.text.split('&') if token]
+
+    def set_squad(self, squad_number, telegram_id):
+        res = requests.get(url=f'{self.address}{EndPoint.SET_PLATOON_SQUAD_OF_USER}',
+                           params={'squad_number': squad_number, 'telegram_id': telegram_id})
+
+        if res.status_code == 200:
+            return Status.OK
+        else:
+            return Status.ERROR
+
+    def get_count_platoon_squad(self, platoon_number: int):
+        res = requests.get(url=f'{self.address}{EndPoint.GET_COUNT_PLATOON_SQUAD}',
+                           params={'platoon_number': platoon_number})
+
+        if res.status_code == 200:
+            return int(res.text)
+        else:
+            return Status.ERROR
+
+    def get_platoon(self, platoon_number: int):
+        res = requests.get(url=f'{self.address}{EndPoint.GET_PLATOON}',
+                           params={'platoon_number': platoon_number})
+
+        if res.status_code == 200:
+            student = res.text.split('%%')
+            students = [tuple(a for a in attr.split('&') if a) for attr in student if attr]
+
+            return students
 
     def get_platoon_commander(self, platoon_number: int):
         res = requests.get(url=f'{self.address}{EndPoint.GET_PLATOON_COMMANDER}',

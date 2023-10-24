@@ -78,18 +78,20 @@ class User:
         return self.writer.get_data()
 
     def __str__(self):
-        res = (f'ФИО: {self.name}\n'
-               f'Дата рождения: {self.date_of_brith}\n'
-               f'Номер телефона: {self.phone_number}\n'
-               f'Почта: {self.mail}\n'
-               f'Адрес: {self.address}\n'
-               f'Институт: {self.institute}\n'
-               f'Направление: {self.direction_of_study}\n'
-               f'Группа: {self.group_study}\n'
-               f'Номер курса: {self.course_number}\n'
-               f'ВУС: {self.vus}\n'
-               f'Взвод: {self.platoon}\n'
-               f'Отделение: {self.squad}\n'
+        attrs = ServerWorker().get_user(self.__telegram_id)
+
+        res = (f'ФИО: {attrs[0]}\n'
+               f'Дата рождения: {attrs[1]}\n'
+               f'Номер телефона: {attrs[2]}\n'
+               f'Почта: {attrs[3]}\n'
+               f'Адрес: {attrs[4]}\n'
+               f'Институт: {attrs[5]}\n'
+               f'Направление: {attrs[6]}\n'
+               f'Группа: {attrs[7]}\n'
+               f'Номер курса: {attrs[8]}\n'
+               f'ВУС: {attrs[9]}\n'
+               f'Взвод: {attrs[10]}\n'
+               f'Отделение: {attrs[11]}\n'
                f'Должность: {ServerWorker().get_role(self.__telegram_id)}\n'
                f'ID: {self.__telegram_id}\n')
 

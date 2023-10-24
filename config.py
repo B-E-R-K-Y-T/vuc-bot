@@ -13,10 +13,16 @@ LOG_MODE = True
 # Максимальный размер логов (для отдельного юзера!) (Если указать -1, то размер будет бесконечным)
 MAX_SIZE_KB_LOG = int(os.getenv('MAX_SIZE_KB_LOG'))
 PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
-ENUM_TYPE_TOKEN = ('Командир отделения', 'Командир взвода', 'Студент')
+ENUM_TYPE_TOKEN = ('Студент', 'Командир отделения', 'Командир взвода')
 # Режим дебага. Никаких ролей и безопасности(Если True, то он включен)
 DEBUG = False
 CRUD_ADDRESS = os.getenv('CRUD_ADDRESS')
+
+
+class Role:
+    STUDENT = ENUM_TYPE_TOKEN[0]
+    COMMANDER_SQUAD = ENUM_TYPE_TOKEN[1]
+    COMMANDER_PLATOON = ENUM_TYPE_TOKEN[2]
 
 
 class Commands:
@@ -30,10 +36,22 @@ class Commands:
     LOGIN = 'login'
     BAN_USER = 'ban_user'
     GET_ROLE = 'get_role'
-    # Пока что не реализованы
+    GET_PLATOON = 'get_platoon'
+    # TODO: Реализовать!
     LATE = 'late'
     ADD_ADMIN = 'add_admin'
     DELETE_ADMIN = 'del_admin'
+
+    class Events:
+        GET_PLATOON_EVENT = 'get_platoon_e'
+        GET_SQUAD_1 = 'get_squad_1_e'
+        GET_SQUAD_2 = 'get_squad_2_e'
+        GET_SQUAD_3 = 'get_squad_3_e'
+
+        class EditUser:
+            SQUAD = 'edit_squad'
+            # TODO: Реализовать!
+            ROLE = 'edit_role'
 
     class Flags:
         class Ban:
@@ -50,6 +68,16 @@ class Message:
     EXIT_PROCESS = 'Вы вышли из процесса.'
     CANCEL_STEP_PROCESS = 'Действие отменено.'
     SUCCESSFUL = 'Успешно!'
+    SELECT_SQUAD = 'Выберете отделение: '
+
+    class EditUser:
+        MAIN = 'Какой параметр Вы хотите поменять?'
+        SQUAD = 'Отделение'
+        ROLE = 'Должность'
+
+    class EditSquadUserState:
+        EDIT = 'Введите номер отделения цифрой: '
+        FINAL = 'Обновляю атрибут...'
 
     class Registration:
         WARNING = 'Отправляя данные, Вы даете согласие на их обработку, хранение и анализ.'
@@ -119,3 +147,6 @@ class EndPoint:
     DELETE_USER = '/del_user'
     GET_USER = '/get_user'
     GET_PLATOON_COMMANDER = '/get_platoon_commander'
+    GET_PLATOON = '/get_platoon'
+    GET_COUNT_PLATOON_SQUAD = '/get_count_squad_in_platoon'
+    SET_PLATOON_SQUAD_OF_USER = '/set_squad_in_platoon_of_user'

@@ -1,7 +1,7 @@
 import string
 import random
-import config
 
+from config import Role
 from utils.server_worker.server_worker import ServerWorker
 from utils.user_worker.user import User
 
@@ -33,7 +33,8 @@ def gen_tele_id():
 
 
 def gen_token():
-    tokens = ServerWorker().get_tokens(1, random.choice(config.ENUM_TYPE_TOKEN))
+    # tokens = ServerWorker().get_tokens(1, random.choice(config.ENUM_TYPE_TOKEN))
+    tokens = ServerWorker().get_tokens(1, Role.STUDENT)
 
     return tokens[0]
 
@@ -43,7 +44,7 @@ def create_user():
     ServerWorker().attach_token_to_user(t_id, gen_token())
     user = User(t_id)
     attrs = [generate_name(), '1.1.1901', '89168118457', 'test@test.ber', 'address', 'name_inst',
-             'dir_study', 'BSBO-08-19', 1, 541100, random.choice(gen_platoon()), random.randint(1, 3)]
+             'dir_study', 'BSBO-08-19', 1, 541100, 5520, random.randint(1, 3)]
 
     for attr in attrs:
         user.writer.next_data(attr)
@@ -63,4 +64,3 @@ if __name__ == '__main__':
     # create_user()
 
     create(30)
-

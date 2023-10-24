@@ -1,6 +1,11 @@
 import telebot
 
-from config import TELEGRAM_BOT_TOKEN, Message, Commands
+from telebot import types
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from config import TELEGRAM_BOT_TOKEN, Message, Commands, Role
+from utils.fsm.edit_squad_user.edit_squad_user import FiniteStateMachineEditSquadUser
+from utils.fsm.edit_squad_user.states import EditSquadUserState, EDIT_SQUAD_USER_MSG_STATES
+from utils.fsm.edit_squad_user.validators import EDIT_SQUAD_USER_VALIDATORS
 from utils.fsm.fsm_container import FSMContainer
 from utils.fsm.login.login_fsm import FiniteStateMachineLogin
 from utils.fsm.login.states import LoginState, LOGIN_MSG_STATES
@@ -8,6 +13,7 @@ from utils.fsm.registrarion.states import REGISTRATION_MSG_STATES, RegistrationS
 from utils.security.security import Security
 from utils.logger import log
 from utils.server_worker.server_worker import ServerWorker, Status, check_connection_with_server
+from utils.user_worker.edit_user import ListenerEditUser
 from utils.user_worker.user import save_user, get_telegram_id, get_user
 from utils.fsm.registrarion.registration_fsm import FiniteStateMachineRegistration
 from utils.fsm.registrarion.validators import REGISTRATION_VALIDATORS
@@ -22,6 +28,8 @@ bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode=None)
 security = Security(bot=bot)
 fsm_worker = FSMContainer()
 token_handler = TokenHandler()
+edit_users = {}
+listener_edit_user = ListenerEditUser()
 
 
 @bot.message_handler(commands=[Commands.START, Commands.HELP])
@@ -29,6 +37,63 @@ token_handler = TokenHandler()
 @save_user
 def send_welcome(message):
     bot.send_message(message.chat.id, Message.WELCOME)
+
+
+@bot.message_handler(commands=[Commands.GET_PLATOON])
+@log
+@check_connection_with_server(bot=bot)
+@save_user
+@security.is_login
+def command_get_platoon(message: types.Message):
+    markup = InlineKeyboardMarkup()
+    platoon_number = get_user(get_telegram_id(message)).platoon
+    print(platoon_number)
+    count_squad = ServerWorker().get_count_platoon_squad(platoon_number)
+
+    events = [Commands.Events.GET_SQUAD_1, Commands.Events.GET_SQUAD_2, Commands.Events.GET_SQUAD_3]
+
+    for squad_num in range(count_squad):
+        markup.add(InlineKeyboardButton(squad_num + 1, callback_data=events[squad_num]))
+
+    bot.send_message(chat_id=message.chat.id, text=Message.SELECT_SQUAD, reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_1)
+def squad_1(call: types.CallbackQuery):
+    handler_select_squad(call, '1')
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_2)
+def squad_2(call: types.CallbackQuery):
+    handler_select_squad(call, '2')
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_3)
+def squad_3(call: types.CallbackQuery):
+    handler_select_squad(call, '3')
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def handler_callbacks(call: types.CallbackQuery):
+    if call.data in edit_users.keys():
+        telegram_id = int(call.data)
+        listener_edit_user[get_telegram_id(call.message)] = telegram_id
+        handler_edit_user(call)
+    elif call.data == Commands.Events.EditUser.SQUAD:
+        bot.send_message(call.message.chat.id, Message.EditSquadUserState.EDIT)
+
+        state = FiniteStateMachineEditSquadUser(get_user(get_telegram_id(call.message)))
+
+        fsm_worker.set_fsm_obj(get_telegram_id(call.message), state)
+
+
+def handler_edit_user(call):
+    markup = InlineKeyboardMarkup()
+
+    markup.add(InlineKeyboardButton(Message.EditUser.SQUAD, callback_data=Commands.Events.EditUser.SQUAD))
+    # markup.add(InlineKeyboardButton(Message.EditUser.ROLE, callback_data=Commands.Events.EditUser.ROLE))
+
+    bot.send_message(chat_id=call.message.chat.id, text=Message.EditUser.MAIN, reply_markup=markup)
 
 
 @bot.message_handler(commands=[Commands.REG])
@@ -159,6 +224,8 @@ def handler_message(message):
         handler_registration(user, message)
     elif isinstance(user.state, GetTokenState):
         handler_get_token(user, message)
+    elif isinstance(user.state, EditSquadUserState):
+        handler_edit_squad_user(user, message)
     else:
         bot.reply_to(message, Message.DEFAULT)
 
@@ -170,11 +237,12 @@ def handler_registration(user, message):
         user.writer.next_data(message.text)
 
         if user.state == RegistrationStates.SQUAD:
-            if ServerWorker().get_platoon_commander(int(message.text)):
-                bot.reply_to(message, Message.Error.PLATOON_COMMANDER_ERROR)
-                user.writer.old_data()
-                command_cancel(message)
-                return
+            if ServerWorker().get_role(get_telegram_id(message)) == Role.COMMANDER_PLATOON:
+                if ServerWorker().get_platoon_commander(int(message.text)):
+                    bot.reply_to(message, Message.Error.PLATOON_COMMANDER_ERROR)
+                    user.writer.old_data()
+                    command_cancel(message)
+                    return
 
         if user.state == RegistrationStates.FINAL:
             res = user.write_data()
@@ -204,6 +272,20 @@ def handler_get_token(user, message):
             bot.send_message(get_telegram_id(message), msg)
 
             user.state = None
+
+
+def handler_edit_squad_user(user, message):
+    res = handler_state(user, message, EditSquadUserState, EDIT_SQUAD_USER_VALIDATORS, EDIT_SQUAD_USER_MSG_STATES)
+
+    if res:
+        if user.state == EditSquadUserState.FINAL:
+            squad_num = int(message.text)
+
+            ServerWorker().set_squad(squad_num, listener_edit_user[get_telegram_id(message)])
+
+            user.state = None
+
+            bot.reply_to(message, Message.SUCCESSFUL)
 
 
 def handler_login(user, message):
@@ -246,6 +328,22 @@ def handler_state(user, message, state, validators, msg_states) -> bool:
             bot.send_message(get_telegram_id(message), msg_states[get_user(get_telegram_id(message)).state])
 
             return True
+
+
+def handler_select_squad(call, target_squad: str):
+    markup = InlineKeyboardMarkup()
+    platoon_number = get_user(get_telegram_id(call.message)).platoon
+    platoon = ServerWorker().get_platoon(platoon_number)
+
+    for user in platoon:
+        squad_num = user[-3]
+        telegram_id = user[-2]
+
+        if squad_num == target_squad:
+            edit_users[telegram_id] = user[0]
+            markup.add(InlineKeyboardButton(user[0], callback_data=telegram_id))
+
+    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.id, reply_markup=markup)
 
 
 bot.infinity_polling()
