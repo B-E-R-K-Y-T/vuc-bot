@@ -33,6 +33,15 @@ class ServerWorker:
         if res.status_code == 200:
             return [token for token in res.text.split('&') if token]
 
+    def get_platoon_commander(self, platoon_number: int):
+        res = requests.get(url=f'{self.address}{EndPoint.GET_PLATOON_COMMANDER}',
+                           params={'platoon_number': platoon_number})
+
+        if res.status_code == 200:
+            return int(res.text) if res.text.isnumeric() else 0
+        else:
+            return Status.ERROR
+
     def get_free_tokens(self):
         res = requests.get(url=f'{self.address}{EndPoint.GET_FREE_TOKEN}')
 

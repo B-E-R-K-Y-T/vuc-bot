@@ -8,6 +8,7 @@ from utils.exceptions import NameException, DateException, PhoneException, MailE
 from datetime import datetime
 from utils.fsm.validators_worker import ValidatorWorker
 from utils.fsm.registrarion.states import RegistrationStates
+from utils.server_worker.server_worker import ServerWorker
 
 vw = ValidatorWorker()
 
@@ -107,7 +108,9 @@ def validator_vus(text: str):
 
 @vw.attach_validator(RegistrationStates.PLATOON)
 def validator_platoon(text: str):
-    if not text.isnumeric() and len(text) == 3:
+    if not text.isnumeric():
+        raise PlatoonException(Message.Error.PLATOON)
+    elif len(text) != 3:
         raise PlatoonException(Message.Error.PLATOON)
 
 

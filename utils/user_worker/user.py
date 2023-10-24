@@ -45,6 +45,7 @@ class User:
         self.__state = state
 
     def write_data(self):
+        print(self.writer.get_data())
         (self.name, self.date_of_brith, self.phone_number, self.mail, self.address,
          self.institute, self.direction_of_study, self.group_study, self.course_number,
          self.vus, self.platoon, self.squad) = self.writer.get_data()
@@ -101,6 +102,9 @@ class WriterData:
 
     def next_data(self, value):
         self.__data.append(value)
+
+    def old_data(self):
+        self.__data.pop(-1)
 
     def get_data(self):
         return self.__data

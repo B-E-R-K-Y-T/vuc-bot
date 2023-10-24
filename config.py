@@ -96,6 +96,7 @@ class Message:
         TYPE_TOKEN = f'Тип токена может быть только таким: {ENUM_TYPE_TOKEN}'
         NOTHING_CANCEL_STEP_PROCESS = f'Нечего отменять.'
         DEFAULT_ERROR = 'Ошибка!'
+        PLATOON_COMMANDER_ERROR = 'У данного взвода уже есть командир!'
         ERROR_LEN_TOKEN = 'Длина токена должна быть: '  # Потом я конкатенирую сюда длину
         INVALID_TOKEN = 'Токен недействителен!'
         CONNECTION_ERROR = 'Нет соединения с сервером!'
@@ -117,3 +118,4 @@ class EndPoint:
     GET_ROLE = '/get_role'
     DELETE_USER = '/del_user'
     GET_USER = '/get_user'
+    GET_PLATOON_COMMANDER = '/get_platoon_commander'

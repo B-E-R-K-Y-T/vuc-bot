@@ -169,6 +169,13 @@ def handler_registration(user, message):
     if res:
         user.writer.next_data(message.text)
 
+        if user.state == RegistrationStates.SQUAD:
+            if ServerWorker().get_platoon_commander(int(message.text)):
+                bot.reply_to(message, Message.Error.PLATOON_COMMANDER_ERROR)
+                user.writer.old_data()
+                command_cancel(message)
+                return
+
         if user.state == RegistrationStates.FINAL:
             res = user.write_data()
 
@@ -176,6 +183,8 @@ def handler_registration(user, message):
                 bot.send_message(get_telegram_id(message), Message.SUCCESSFUL)
             else:
                 bot.send_message(get_telegram_id(message), Message.Error.DEFAULT_ERROR)
+
+            user.state = None
 
 
 def handler_get_token(user, message):
