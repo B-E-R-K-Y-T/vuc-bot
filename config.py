@@ -27,12 +27,13 @@ class Commands:
     GET_TOKEN = 'token'
     ROLLBACK_PROCESS = 'rollback'
     CANCEL_STEP_PROCESS = 'cancel'
+    LOGIN = 'login'
+    BAN_USER = 'ban_user'
+    GET_ROLE = 'get_role'
     # Пока что не реализованы
     LATE = 'late'
     ADD_ADMIN = 'add_admin'
     DELETE_ADMIN = 'del_admin'
-    LOGIN = 'login'
-    BAN_USER = 'ban_user'
 
     class Flags:
         class Ban:
@@ -64,7 +65,7 @@ class Message:
         VUS = 'Введите ваш ВУС*: \n\n*Военно-учетная специальность'
         PLATOON = 'Введите номер Вашего взвода: '
         SQUAD = 'Введите номер Вашего отделения: '
-        FINAL = 'Регистрация окончена. Сохраняю данные'
+        FINAL = 'Регистрация окончена. Сохраняю данные...'
 
     class GetToken:
         TYPE_TOKEN = f'Для кого Вы хотите сгенерировать токены?\n\n{ENUM_TYPE_TOKEN}'
@@ -111,3 +112,8 @@ class EndPoint:
     ATTACH_TOKEN = '/attach_token'
     BAN_USER = '/ban_user'
     GET_LEN_TOKEN = '/get_len_token'
+    SAVE_USER = '/save_user'
+    CHECK_EXIST_USER = '/check_exist_user'
+    GET_ROLE = '/get_role'
+    DELETE_USER = '/del_user'
+    GET_USER = '/get_user'

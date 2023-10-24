@@ -170,7 +170,12 @@ def handler_registration(user, message):
         user.writer.next_data(message.text)
 
         if user.state == RegistrationStates.FINAL:
-            user.write_data()
+            res = user.write_data()
+
+            if res == Status.OK:
+                bot.send_message(get_telegram_id(message), Message.SUCCESSFUL)
+            else:
+                bot.send_message(get_telegram_id(message), Message.Error.DEFAULT_ERROR)
 
 
 def handler_get_token(user, message):

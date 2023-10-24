@@ -9,4 +9,11 @@ class TokenHandler:
         self.token_user[1] = role
 
     def get_token_params(self):
-        return self.token_user[0], self.token_user[1]
+        res = (self.token_user[0], self.token_user[1])
+
+        self.__clear_token()
+
+        return res
+
+    def __clear_token(self):
+        self.token_user = [..., ...]

@@ -39,6 +39,28 @@ class ServerWorker:
         if res.status_code == 200:
             return [token for token in res.text.split('&') if token]
 
+    def delete_user(self, telegram_id: int):
+        res = requests.get(url=f'{self.address}{EndPoint.DELETE_USER}', params={'telegram_id': telegram_id})
+
+        if res.status_code == 200:
+            return Status.OK
+        else:
+            return Status.ERROR
+
+    def get_user(self, telegram_id: int):
+        res = requests.get(url=f'{self.address}{EndPoint.GET_USER}', params={'telegram_id': telegram_id})
+
+        if res.status_code == 200:
+            return [token for token in res.text.split('&') if token]
+
+    def save_user(self, data):
+        res = requests.get(url=f'{self.address}{EndPoint.SAVE_USER}', params=data)
+
+        if res.status_code == 200 and res.text == '0':
+            return Status.OK
+        else:
+            return Status.ERROR
+
     def get_login_users(self):
         res = requests.get(url=f'{self.address}{EndPoint.GET_LOGINS}')
 
@@ -50,6 +72,12 @@ class ServerWorker:
 
         if res.status_code == 200:
             return int(res.text)
+
+    def get_role(self, telegram_id: int):
+        res = requests.get(url=f'{self.address}{EndPoint.GET_ROLE}', params={'telegram_id': telegram_id})
+
+        if res.status_code == 200:
+            return res.text
 
     def get_admin_users(self):
         res = requests.get(url=f'{self.address}{EndPoint.GET_ADMINS}')

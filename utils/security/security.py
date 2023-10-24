@@ -1,5 +1,5 @@
 from config import Message, DEBUG
-from utils.server_worker.server_worker import ServerWorker, Status
+from utils.server_worker.server_worker import ServerWorker
 
 
 class Security:

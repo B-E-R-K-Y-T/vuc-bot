@@ -1,5 +1,7 @@
 import uuid
 
+from utils.server_worker.server_worker import ServerWorker
+
 users = {}
 
 
@@ -47,8 +49,32 @@ class User:
          self.institute, self.direction_of_study, self.group_study, self.course_number,
          self.vus, self.platoon, self.squad) = self.writer.get_data()
 
+        params = {
+            'name': self.name,
+            'date_of_brith': self.date_of_brith,
+            'phone_number': self.phone_number,
+            'mail': self.mail,
+            'address': self.address,
+            'institute': self.institute,
+            'direction_of_study': self.direction_of_study,
+            'group_study': self.group_study,
+            'course_number': self.course_number,
+            'vus': self.vus,
+            'platoon': self.platoon,
+            'squad': self.squad,
+            'telegram_id': self.__telegram_id,
+            'role': ServerWorker().get_role(telegram_id=self.__telegram_id),
+        }
+
+        return ServerWorker().save_user(params)
+
+    def set_data(self):
+        (self.name, self.date_of_brith, self.phone_number, self.mail, self.address,
+         self.institute, self.direction_of_study, self.group_study, self.course_number,
+         self.vus, self.platoon, self.squad) = self.writer.get_data()
+
     def get_data(self):
-        return self.__all_data
+        return self.writer.get_data()
 
     def __str__(self):
         res = (f'ФИО: {self.name}\n'
@@ -63,6 +89,7 @@ class User:
                f'ВУС: {self.vus}\n'
                f'Взвод: {self.platoon}\n'
                f'Отделение: {self.squad}\n'
+               f'Должность: {ServerWorker().get_role(self.__telegram_id)}\n'
                f'ID: {self.__telegram_id}\n')
 
         return res
@@ -90,7 +117,17 @@ class WriterData:
 def save_user(func):
     def wrapper(message, *args, **kwargs):
         telegram_id = message.chat.id
-        if telegram_id not in users:
+        user = ServerWorker().get_user(telegram_id)
+
+        if user and not get_user(telegram_id):
+            usr = User(telegram_id)
+
+            for attr in user:
+                usr.writer.next_data(attr)
+
+            usr.set_data()
+            users[telegram_id] = usr
+        elif not get_user(telegram_id):
             users[telegram_id] = User(telegram_id)
 
         return func(message, *args, **kwargs)
@@ -103,4 +140,4 @@ def get_telegram_id(message):
 
 
 def get_user(telegram_id):
-    return users[telegram_id]
+    return users.get(telegram_id)
