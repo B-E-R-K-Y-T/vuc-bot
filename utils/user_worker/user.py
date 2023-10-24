@@ -50,6 +50,8 @@ class User:
          self.institute, self.direction_of_study, self.group_study, self.course_number,
          self.vus, self.platoon, self.squad) = self.writer.get_data()
 
+        ServerWorker().attach_user_to_attendance(self.__telegram_id)
+
         params = {
             'name': self.name,
             'date_of_brith': self.date_of_brith,

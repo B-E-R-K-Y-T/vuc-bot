@@ -90,6 +90,23 @@ class ServerWorker:
         if res.status_code == 200:
             return [token for token in res.text.split('&') if token]
 
+    def attach_user_to_attendance(self, telegram_id: int):
+        res = requests.get(url=f'{self.address}{EndPoint.ATTACH_USER_ATTENDANCE}', params={'telegram_id': telegram_id})
+
+        if res.status_code == 200:
+            return Status.OK
+        else:
+            return Status.ERROR
+
+    def add_visit_user(self, date_v: str, visiting: int, telegram_id: int):
+        res = requests.get(url=f'{self.address}{EndPoint.UPDATE_ATTENDANCE_USER}',
+                           params={'date_v': date_v, 'visiting': visiting, 'telegram_id': telegram_id,})
+
+        if res.status_code == 200:
+            return Status.OK
+        else:
+            return Status.ERROR
+
     def save_user(self, data):
         res = requests.get(url=f'{self.address}{EndPoint.SAVE_USER}', params=data)
 

@@ -37,6 +37,7 @@ class Commands:
     BAN_USER = 'ban_user'
     GET_ROLE = 'get_role'
     GET_PLATOON = 'get_platoon'
+    ATTEND = 'attend'
     # TODO: Реализовать!
     LATE = 'late'
     ADD_ADMIN = 'add_admin'
@@ -50,6 +51,7 @@ class Commands:
 
         class EditUser:
             SQUAD = 'edit_squad'
+            ATTEND = 'edit_attend'
             # TODO: Реализовать!
             ROLE = 'edit_role'
 
@@ -150,3 +152,5 @@ class EndPoint:
     GET_PLATOON = '/get_platoon'
     GET_COUNT_PLATOON_SQUAD = '/get_count_squad_in_platoon'
     SET_PLATOON_SQUAD_OF_USER = '/set_squad_in_platoon_of_user'
+    ATTACH_USER_ATTENDANCE = '/attach_user_to_attendance'
+    UPDATE_ATTENDANCE_USER = '/add_visit_user'

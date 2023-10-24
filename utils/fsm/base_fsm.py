@@ -16,4 +16,3 @@ class BaseFiniteStateMachine:
             self.user.state = self.states[self.step]
         else:
             self.user.state = self.states[0]
-

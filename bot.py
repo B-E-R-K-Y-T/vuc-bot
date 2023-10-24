@@ -47,7 +47,6 @@ def send_welcome(message):
 def command_get_platoon(message: types.Message):
     markup = InlineKeyboardMarkup()
     platoon_number = get_user(get_telegram_id(message)).platoon
-    print(platoon_number)
     count_squad = ServerWorker().get_count_platoon_squad(platoon_number)
 
     events = [Commands.Events.GET_SQUAD_1, Commands.Events.GET_SQUAD_2, Commands.Events.GET_SQUAD_3]
@@ -56,44 +55,6 @@ def command_get_platoon(message: types.Message):
         markup.add(InlineKeyboardButton(squad_num + 1, callback_data=events[squad_num]))
 
     bot.send_message(chat_id=message.chat.id, text=Message.SELECT_SQUAD, reply_markup=markup)
-
-
-@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_1)
-def squad_1(call: types.CallbackQuery):
-    handler_select_squad(call, '1')
-
-
-@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_2)
-def squad_2(call: types.CallbackQuery):
-    handler_select_squad(call, '2')
-
-
-@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_3)
-def squad_3(call: types.CallbackQuery):
-    handler_select_squad(call, '3')
-
-
-@bot.callback_query_handler(func=lambda call: True)
-def handler_callbacks(call: types.CallbackQuery):
-    if call.data in edit_users.keys():
-        telegram_id = int(call.data)
-        listener_edit_user[get_telegram_id(call.message)] = telegram_id
-        handler_edit_user(call)
-    elif call.data == Commands.Events.EditUser.SQUAD:
-        bot.send_message(call.message.chat.id, Message.EditSquadUserState.EDIT)
-
-        state = FiniteStateMachineEditSquadUser(get_user(get_telegram_id(call.message)))
-
-        fsm_worker.set_fsm_obj(get_telegram_id(call.message), state)
-
-
-def handler_edit_user(call):
-    markup = InlineKeyboardMarkup()
-
-    markup.add(InlineKeyboardButton(Message.EditUser.SQUAD, callback_data=Commands.Events.EditUser.SQUAD))
-    # markup.add(InlineKeyboardButton(Message.EditUser.ROLE, callback_data=Commands.Events.EditUser.ROLE))
-
-    bot.send_message(chat_id=call.message.chat.id, text=Message.EditUser.MAIN, reply_markup=markup)
 
 
 @bot.message_handler(commands=[Commands.REG])
@@ -201,7 +162,7 @@ def command_login(message):
 @log
 @check_connection_with_server(bot=bot)
 @save_user
-def handler_message_loging_proces(message):
+def handler_message_loging_process(message):
     user = get_user(get_telegram_id(message))
 
     if isinstance(user.state, LoginState):
@@ -211,7 +172,6 @@ def handler_message_loging_proces(message):
 
 
 @bot.message_handler(func=lambda m: True)
-@log
 @check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
@@ -228,6 +188,44 @@ def handler_message(message):
         handler_edit_squad_user(user, message)
     else:
         bot.reply_to(message, Message.DEFAULT)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_1)
+def squad_1(call: types.CallbackQuery):
+    handler_select_squad(call, '1')
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_2)
+def squad_2(call: types.CallbackQuery):
+    handler_select_squad(call, '2')
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_3)
+def squad_3(call: types.CallbackQuery):
+    handler_select_squad(call, '3')
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def handler_callbacks(call: types.CallbackQuery):
+    if call.data in edit_users.keys():
+        telegram_id = int(call.data)
+        listener_edit_user[get_telegram_id(call.message)] = telegram_id
+        handler_edit_user(call)
+    elif call.data == Commands.Events.EditUser.SQUAD:
+        bot.send_message(call.message.chat.id, Message.EditSquadUserState.EDIT)
+
+        state = FiniteStateMachineEditSquadUser(get_user(get_telegram_id(call.message)))
+
+        fsm_worker.set_fsm_obj(get_telegram_id(call.message), state)
+
+
+def handler_edit_user(call):
+    markup = InlineKeyboardMarkup()
+
+    markup.add(InlineKeyboardButton(Message.EditUser.SQUAD, callback_data=Commands.Events.EditUser.SQUAD))
+    # markup.add(InlineKeyboardButton(Message.EditUser.ROLE, callback_data=Commands.Events.EditUser.ROLE))
+
+    bot.send_message(chat_id=call.message.chat.id, text=Message.EditUser.MAIN, reply_markup=markup)
 
 
 def handler_registration(user, message):
