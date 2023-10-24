@@ -1,5 +1,36 @@
-import datetime
+"""
+Переменные:
+- TELEGRAM_BOT_TOKEN: Токен для доступа к Telegram API.
+- bot: Объект TeleBot для взаимодействия с ботом Telegram.
+- security: Объект Security для реализации функций безопасности.
+- fsm_worker: Объект FSMContainer для управления конечными автоматами.
+- token_handler: Объект TokenHandler для обработки токенов.
+- edit_users: Словарь для хранения пользователей, редактирующих данные.
+- listener_edit_user: Объект ListenerEditUser для отслеживания изменений пользователя.
 
+Обработчики команд:
+1. send_welcome: Обработчик команды START и HELP, отправляет приветственное сообщение пользователю.
+2. command_get_platoon: Обработчик команды GET_PLATOON, отправляет пользователю клавиатуру с кнопками для выбора взвода.
+3. command_reg: Обработчик команды REG, запускает процесс регистрации пользователя.
+4. command_get_token: Обработчик команды GET_TOKEN, запускает процесс получения токена.
+5. command_stop_process: Обработчик команды ROLLBACK_PROCESS, останавливает текущий процесс.
+6. command_self: Обработчик команды SELF, отображает информацию о текущем пользователе.
+7. command_ban_user: Обработчик команды BAN_USER, блокирует пользователя.
+8. command_cancel: Обработчик команды CANCEL_STEP_PROCESS, отменяет текущий шаг процесса.
+9. command_login: Обработчик команды LOGIN, запускает процесс входа пользователя.
+10. handler_message_loging_process: Обработчик сообщений для процесса входа пользователя.
+11. handler_message: Обработчик сообщений пользователя.
+12. squad_1, squad_2, squad_3: Обработчики выбора отряда.
+13. attend, attend_no: Обработчики выбора посещения пользователя.
+
+Функции-обработчики:
+- handler_edit_user: Обработчик редактирования пользователя.
+- handler_registration: Обработчик процесса регистрации пользователя.
+- handler_get_token: Обработчик процесса получения
+
+"""
+
+import datetime
 import telebot
 
 from telebot import types
@@ -38,6 +69,15 @@ listener_edit_user = ListenerEditUser()
 @log
 @save_user
 def send_welcome(message):
+    """
+    Функция `send_welcome` является обработчиком команды START и HELP. Она выполняет следующие действия:
+
+    1. Принимает сообщение от пользователя через объект `message`.
+    2. Отправляет приветственное сообщение Message.WELCOME пользователю с помощью метода `bot.send_message`.
+    3. Ведет журналирование выполнения команды с помощью декоратора `@log`.
+    4. Сохраняет информацию о пользователе с помощью декоратора `@save_user`.
+    """
+
     bot.send_message(message.chat.id, Message.WELCOME)
 
 
@@ -47,6 +87,23 @@ def send_welcome(message):
 @save_user
 @security.is_login
 def command_get_platoon(message: types.Message):
+    """Функция `command_get_platoon` является обработчиком команды GET_PLATOON. Она выполняет следующие действия:
+
+1. Принимает сообщение от пользователя через объект `message`.
+2. Проверяет подключение к серверу с помощью декоратора `@check_connection_with_server`.
+3. Сохраняет информацию о пользователе с помощью декоратора `@save_user`.
+4. Проверяет, авторизован ли пользователь с помощью декоратора `@security.is_login`.
+5. Создает объект `InlineKeyboardMarkup` для разметки клавиатуры.
+6. Получает информацию о пользователе с помощью функции `get_user` и его Telegram ID из объекта `message`.
+7. Если пользователь имеет роль COMMANDER_PLATOON или COMMANDER_SQUAD:
+   - Получает номер взвода `platoon_number` пользователя.
+   - Получает количество отрядов `count_squad` в взводе с помощью метода `get_count_platoon_squad` из объекта `ServerWorker`.
+   - Создает события `events` для каждого отряда.
+   - Добавляет кнопки для каждого отряда в разметку клавиатуры с помощью метода `markup.add`.
+   - Отправляет сообщение с текстом Message.SELECT_SQUAD и клавиатурой reply_markup пользователю с помощью метода `bot.send_message`.
+8. В противном случае, если пользователь не имеет доступа к команде:
+   - Отправляет ответное сообщение Message.ACCESS_DENIED пользователю с помощью метода `bot.reply_to`.
+"""
     markup = InlineKeyboardMarkup()
     user = get_user(get_telegram_id(message))
 
@@ -70,6 +127,18 @@ def command_get_platoon(message: types.Message):
 @save_user
 @security.is_login
 def command_reg(message):
+    """Функция `command_reg` является обработчиком команды REG. Она выполняет следующие действия:
+
+1. Принимает сообщение от пользователя через объект `message`.
+2. Проверяет подключение к серверу с помощью декоратора `@check_connection_with_server`.
+3. Сохраняет информацию о пользователе с помощью декоратора `@save_user`.
+4. Проверяет, авторизован ли пользователь с помощью декоратора `@security.is_login`.
+5. Отправляет ответное сообщение Message.Registration.WARNING пользователю с помощью метода `bot.reply_to`, предупреждая о начале процесса регистрации.
+6. Отправляет сообщение с текстом Message.Registration.NAME пользователю с помощью метода `bot.send_message`, запрашивая имя пользователя.
+7. Создает экземпляр `FiniteStateMachineRegistration` и передает ему информацию о пользователе из функции `get_user` с Telegram ID из объекта `message`.
+8. Очищает список данных пользователя с помощью `get_user(get_telegram_id(message)).writer.data = []`.
+9. Устанавливает объект конечного автомата в `fsm_worker` с помощью `fsm_worker.set_fsm_obj(get_telegram_id(message), state)`.
+"""
     bot.reply_to(message, Message.Registration.WARNING)
     bot.send_message(message.chat.id, Message.Registration.NAME)
 
@@ -88,6 +157,18 @@ def command_reg(message):
 @security.is_login
 @security.is_admin
 def command_get_token(message):
+    """Функция `command_get_token` является обработчиком команды GET_TOKEN. Она выполняет следующие действия:
+
+1. Принимает сообщение от пользователя через объект `message`.
+2. Проверяет подключение к серверу с помощью декоратора `@check_connection_with_server`.
+3. Сохраняет информацию о пользователе с помощью декоратора `@save_user`.
+4. Проверяет, авторизован ли пользователь с помощью декоратора `@security.is_login`.
+5. Проверяет, является ли пользователь администратором с помощью декоратора `@security.is_admin`.
+6. Отправляет сообщение с текстом Message.GetToken.TYPE_TOKEN пользователю с помощью метода `bot.send_message`, запрашивая тип токена.
+7. Создает экземпляр `FiniteStateMachineGetToken` и передает ему информацию о пользователе из функции `get_user` с Telegram ID из объекта `message`.
+8. Устанавливает объект конечного автомата в `fsm_worker` с помощью `fsm_worker.set_fsm_obj(get_telegram_id(message), state)`.
+
+"""
     bot.send_message(message.chat.id, Message.GetToken.TYPE_TOKEN)
     state = FiniteStateMachineGetToken(get_user(get_telegram_id(message)))
 
@@ -100,6 +181,15 @@ def command_get_token(message):
 @save_user
 @security.is_login
 def command_stop_process(message):
+    """Функция `command_stop_process` является обработчиком команды ROLLBACK_PROCESS. Она выполняет следующие действия:
+
+1. Принимает сообщение от пользователя через объект `message`.
+2. Проверяет подключение к серверу с помощью декоратора `@check_connection_with_server`.
+3. Сохраняет информацию о пользователе с помощью декоратора `@save_user`.
+4. Проверяет, авторизован ли пользователь с помощью декоратора `@security.is_login`.
+5. Устанавливает состояние пользователя (`state`) в значение `None`, чтобы остановить выполняющийся процесс.
+6. Отправляет ответное сообщение Message.EXIT_PROCESS пользователю с помощью метода `bot.reply_to`, чтобы сообщить о завершении процесса.
+"""
     get_user(get_telegram_id(message)).state = None
 
     bot.reply_to(message, Message.EXIT_PROCESS)
@@ -121,6 +211,15 @@ def command_self(message):
 @security.is_login
 @security.is_admin
 def command_ban_user(message):
+    """
+    Эта функция выполняет команду бана пользователя, с предварительной обработкой сообщения и проверкой различных условий,
+    включая подключение к серверу, аутентификацию пользователя и проверку его прав доступа, после чего вызывается метод
+    серверного воркера для выполнения бана, и в зависимости от результата отправляется соответствующее сообщение
+    об успехе или ошибке.
+
+    :param message:
+    :return:
+    """
     try:
         _, user_id = message.text.split(Commands.Flags.Ban.USER)
         res = ServerWorker().ban_user(user_id)
@@ -139,6 +238,12 @@ def command_ban_user(message):
 @save_user
 @security.is_login
 def command_cancel(message):
+    """В этом коде происходит проверка состояния пользователя и выполнение логики отмены текущего шага процесса. Если пользователь имеет непустое состояние (`fsm_attr_user.step > -1`), то происходит переход к предыдущему состоянию (`fsm_attr_user.old_state()`), и отправляется сообщение о успешной отмене шага (`Message.CANCEL_STEP_PROCESS`).
+
+Если пользователь не имеет состояния или его состояние пустое, то у пользователя сбрасывается состояние (`user.state = None`), и отправляется сообщение об ошибке, что нечего отменять (`Message.Error.NOTHING_CANCEL_STEP_PROCESS`).
+
+Если пользователь не найден (`fsm_attr_user is None`), также отправляется сообщение об ошибке о том, что нечего отменять (`Message.Error.NOTHING_CANCEL_STEP_PROCESS`).
+"""
     fsm_attr_user = fsm_worker.get_fsm_obj(get_telegram_id(message))
     user = get_user(get_telegram_id(message))
 
@@ -170,6 +275,18 @@ def command_login(message):
 @check_connection_with_server(bot=bot)
 @save_user
 def handler_message_loging_process(message):
+    """В этом коде происходит проверка состояния пользователя и выполнение соответствующих действий в зависимости от
+    этого состояния.
+
+Если состояние пользователя является экземпляром класса `LoginState`, то вызывается функция `handler_login(user, message)`,
+которая обрабатывает действия связанные с процессом входа в систему.
+
+В противном случае, вызывается функция `security.is_login(handler_message)(message)`, которая проверяет, авторизован ли
+ пользователь, и в случае, если пользователь авторизован, передает управление функции `handler_message(message)`
+  для обработки входящего сообщения.
+
+Обратите внимание, что `security.is_login` и `handler_message` являются функциями или методами, которые должны быть определены где-то в коде, поскольку они вызываются через скобки `()`.
+"""
     user = get_user(get_telegram_id(message))
 
     if isinstance(user.state, LoginState):
@@ -183,17 +300,35 @@ def handler_message_loging_process(message):
 @save_user
 @security.is_login
 def handler_message(message):
+    """
+    Обрабатывает сообщения пользователя и выполняет соответствующие действия в зависимости от состояния пользователя.
+
+    Аргументы:
+    - message: объект сообщения от пользователя
+
+    Возвращаемое значение: нет
+
+    Исключения: нет
+    """
+
+    # Получение объекта пользователя по Telegram ID сообщения
     user = get_user(get_telegram_id(message))
 
+    # Вывод текущего состояния пользователя
     print(f'{user.state=}')
 
+    # Обработка различных состояний пользователя
     if isinstance(user.state, RegistrationStates):
+        # Обработка регистрации пользователя
         handler_registration(user, message)
     elif isinstance(user.state, GetTokenState):
+        # Обработка получения токена пользователя
         handler_get_token(user, message)
     elif isinstance(user.state, EditSquadUserState):
+        # Обработка редактирования информации о пользователе
         handler_edit_squad_user(user, message)
     else:
+        # Ответ по умолчанию от бота
         bot.reply_to(message, Message.DEFAULT)
 
 
