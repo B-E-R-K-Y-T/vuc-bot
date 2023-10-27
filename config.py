@@ -37,6 +37,7 @@ class Commands:
     BAN_USER = 'ban_user'
     GET_PLATOON = 'get_platoon'
     ATTEND = 'attend'
+    UPLOAD_PLATOON = 'upload_platoon'
     # TODO: Реализовать!
     LATE = 'late'
     GET_ROLE = 'get_role'
@@ -116,6 +117,10 @@ class Message:
     class Login:
         LOGIN = 'Введите токен: '
         FINAL = 'Проверяю токен...'
+
+    class UploadPlatoon:
+        UPLOAD = 'Загрузите файл: '
+        FINAL = 'Сканирую...'
 
     class Error:
         NAME = 'Не правильный ввод! Формат ввода такой: ИМЯ ФАМИЛИЯ ОТЧЕСТВО'

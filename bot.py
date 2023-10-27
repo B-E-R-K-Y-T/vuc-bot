@@ -36,13 +36,16 @@ import telebot
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import TELEGRAM_BOT_TOKEN, Message, Commands, Role
-from utils.fsm.edit_squad_user.edit_squad_user import FiniteStateMachineEditSquadUser
+from utils.fsm.upload.upload_fsm import FiniteStateMachineUpload
+from utils.fsm.upload.states import UPLOAD_PLATOON_MSG_STATES
+from utils.fsm.upload.validators import UPLOAD_VALIDATORS
 from utils.fsm.edit_squad_user.states import EditSquadUserState, EDIT_SQUAD_USER_MSG_STATES
 from utils.fsm.edit_squad_user.validators import EDIT_SQUAD_USER_VALIDATORS
 from utils.fsm.fsm_container import FSMContainer
 from utils.fsm.login.login_fsm import FiniteStateMachineLogin
 from utils.fsm.login.states import LoginState, LOGIN_MSG_STATES
 from utils.fsm.registrarion.states import REGISTRATION_MSG_STATES, RegistrationStates
+from utils.fsm.upload.states import UploadState
 from utils.security.security import Security
 from utils.logger import log
 from utils.server_worker.server_worker import ServerWorker, Status, check_connection_with_server
@@ -271,6 +274,20 @@ def command_login(message):
     fsm_worker.set_fsm_obj(get_telegram_id(message), state)
 
 
+@bot.message_handler(commands=[Commands.UPLOAD_PLATOON])
+@log
+@check_connection_with_server(bot=bot)
+@save_user
+@security.is_login
+@security.is_admin
+def command_upload_platoon(message):
+    bot.send_message(message.chat.id, Message.UploadPlatoon.UPLOAD)
+
+    state = FiniteStateMachineUpload(get_user(get_telegram_id(message)))
+
+    fsm_worker.set_fsm_obj(get_telegram_id(message), state)
+
+
 @bot.message_handler(func=lambda m: True)
 @log
 @check_connection_with_server(bot=bot)
@@ -327,6 +344,9 @@ def handler_message(message):
         handler_get_token(user, message)
     elif isinstance(user.state, EditSquadUserState):
         # Обработка редактирования информации о пользователе
+        handler_edit_squad_user(user, message)
+    elif isinstance(user.state, UploadState):
+        # Обработка редактирования файла взвода
         handler_edit_squad_user(user, message)
     else:
         # Ответ по умолчанию от бота
@@ -437,12 +457,32 @@ def handler_callbacks(call: types.CallbackQuery):
         telegram_id = int(call.data)
         listener_edit_user[get_telegram_id(call.message)] = telegram_id
         handler_edit_user(call)
-    # elif call.data == Commands.Events.EditUser.SQUAD:
-    #     bot.send_message(call.message.chat.id, Message.EditSquadUserState.EDIT)
-    #
-    #     state = FiniteStateMachineEditSquadUser(get_user(get_telegram_id(call.message)))
-    #
-    #     fsm_worker.set_fsm_obj(get_telegram_id(call.message), state)
+
+
+@bot.message_handler(content_types=['document'])
+@log
+# @check_connection_with_server
+@save_user
+@security.is_login
+@security.is_admin
+def handle_excel_platoon(message):
+    try:
+        user = get_user(get_telegram_id(message))
+
+        if user.state == UploadState.UPLOAD_FILE:
+            chat_id = message.chat.id
+
+            file_info = bot.get_file(message.document.file_id)
+            downloaded_file = bot.download_file(file_info.file_path)
+
+            src = message.document.file_name
+
+            with open(src, 'wb') as new_file:
+                new_file.write(downloaded_file)
+
+            bot.reply_to(message, "Пожалуй, я сохраню это")
+    except Exception as e:
+        bot.reply_to(message, e)
 
 
 def handler_edit_user(call):
@@ -511,6 +551,17 @@ def handler_edit_squad_user(user, message):
             user.state = None
 
             bot.reply_to(message, Message.SUCCESSFUL)
+
+
+def handler_upload_platoon(user, message):
+    res = handler_state(user, message, UploadState, UPLOAD_VALIDATORS, UPLOAD_PLATOON_MSG_STATES)
+
+    if res:
+        if user.state == UploadState.FINAL:
+
+            user.state = None
+
+            # bot.reply_to(message, Message.SUCCESSFUL)
 
 
 def handler_login(user, message):

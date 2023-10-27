@@ -171,5 +171,5 @@ def get_telegram_id(message):
     return message.chat.id
 
 
-def get_user(telegram_id):
+def get_user(telegram_id) -> User:
     return users.get(telegram_id)
