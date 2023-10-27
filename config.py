@@ -45,9 +45,14 @@ class Commands:
 
     class Events:
         GET_PLATOON_EVENT = 'get_platoon_e'
+
         GET_SQUAD_1 = 'get_squad_1_e'
         GET_SQUAD_2 = 'get_squad_2_e'
         GET_SQUAD_3 = 'get_squad_3_e'
+
+        SET_SQUAD_1 = 'set_squad_1_e'
+        SET_SQUAD_2 = 'set_squad_2_e'
+        SET_SQUAD_3 = 'set_squad_3_e'
 
         class EditUser:
             SQUAD = 'edit_squad'

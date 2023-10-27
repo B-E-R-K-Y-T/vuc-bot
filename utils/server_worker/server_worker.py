@@ -203,7 +203,10 @@ class ServerWorker:
             return Status.ERROR
 
     def test_connection(self):
-        res = requests.get(url=f'{self.address}/')
+        try:
+            res = requests.get(url=f'{self.address}/')
+        except requests.exceptions.ConnectionError as e:
+            return Status.ERROR
 
         if res.status_code == 200:
             return Status.OK

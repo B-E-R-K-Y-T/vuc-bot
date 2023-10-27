@@ -102,7 +102,9 @@ class User:
         return self.writer.get_data()
 
     def __str__(self):
-        attrs = ServerWorker().get_user(self.__telegram_id)
+        res = ServerWorker().get_user(self.__telegram_id)
+        print(res)
+        attrs = res if res else [None for _ in range(12)]
 
         res = (f'ФИО: {attrs[0]}\n'
                f'Дата рождения: {attrs[1]}\n'

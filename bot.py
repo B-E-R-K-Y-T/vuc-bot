@@ -261,6 +261,7 @@ def command_cancel(message):
 
 @bot.message_handler(commands=[Commands.LOGIN])
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 def command_login(message):
     bot.send_message(message.chat.id, Message.Login.LOGIN)
@@ -333,21 +334,25 @@ def handler_message(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_1)
+@check_connection_with_server(bot=bot)
 def squad_1(call: types.CallbackQuery):
     handler_select_squad(call, '1')
 
 
 @bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_2)
+@check_connection_with_server(bot=bot)
 def squad_2(call: types.CallbackQuery):
     handler_select_squad(call, '2')
 
 
 @bot.callback_query_handler(func=lambda call: call.data == Commands.Events.GET_SQUAD_3)
+@check_connection_with_server(bot=bot)
 def squad_3(call: types.CallbackQuery):
     handler_select_squad(call, '3')
 
 
 @bot.callback_query_handler(func=lambda call: call.data == Commands.Events.EditUser.ATTEND)
+@check_connection_with_server(bot=bot)
 def attend(call: types.CallbackQuery):
     markup = InlineKeyboardMarkup()
 
@@ -358,27 +363,86 @@ def attend(call: types.CallbackQuery):
 
 
 @bot.callback_query_handler(func=lambda call: call.data == Commands.Events.EditUser.ATTEND_NO)
+@check_connection_with_server(bot=bot)
 def attend_no(call: types.CallbackQuery):
-    ServerWorker().add_visit_user(datetime.date.today(), 0, listener_edit_user[get_telegram_id(call.message)])
+    res = ServerWorker().add_visit_user(datetime.date.today(), 0,
+                                        listener_edit_user[get_telegram_id(call.message)])
+
+    bot.delete_message(call.message.chat.id, call.message.id)
+
+    if res == Status.OK:
+        bot.send_message(get_telegram_id(message=call.message), Message.SUCCESSFUL)
+    else:
+        bot.send_message(get_telegram_id(message=call.message), Message.Error.DEFAULT_ERROR)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == Commands.Events.EditUser.ATTEND_YES)
-def attend_no(call: types.CallbackQuery):
-    ServerWorker().add_visit_user(datetime.date.today(), 1, listener_edit_user[get_telegram_id(call.message)])
+@check_connection_with_server(bot=bot)
+def attend_yes(call: types.CallbackQuery):
+    res = ServerWorker().add_visit_user(datetime.date.today(), 1,
+                                        listener_edit_user[get_telegram_id(call.message)])
+
+    bot.delete_message(call.message.chat.id, call.message.id)
+
+    if res == Status.OK:
+        bot.send_message(get_telegram_id(message=call.message), Message.SUCCESSFUL)
+    else:
+        bot.send_message(get_telegram_id(message=call.message), Message.Error.DEFAULT_ERROR)
+
+
+@bot.callback_query_handler(func=lambda call: call.data in [Commands.Events.SET_SQUAD_1,
+                                                            Commands.Events.SET_SQUAD_2,
+                                                            Commands.Events.SET_SQUAD_3])
+@check_connection_with_server(bot=bot)
+def set_squads(call: types.CallbackQuery):
+    handlers_edit_squad = {
+        Commands.Events.SET_SQUAD_1: (ServerWorker().set_squad, 1),
+        Commands.Events.SET_SQUAD_2: (ServerWorker().set_squad, 2),
+        Commands.Events.SET_SQUAD_3: (ServerWorker().set_squad, 3),
+    }
+
+    func, num = handlers_edit_squad[call.data]
+
+    res = func(num, listener_edit_user[get_telegram_id(call.message)])
+
+    bot.delete_message(get_telegram_id(call.message), call.message.message_id)
+
+    if res == Status.OK:
+        bot.send_message(get_telegram_id(call.message), Message.SUCCESSFUL)
+    else:
+        bot.send_message(get_telegram_id(call.message), Message.Error.DEFAULT_ERROR)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == Commands.Events.EditUser.SQUAD)
+@check_connection_with_server(bot=bot)
+def set_squad(call: types.CallbackQuery):
+    markup = InlineKeyboardMarkup()
+    user = get_user(get_telegram_id(call.message))
+
+    platoon_number = user.platoon
+    count_squad = ServerWorker().get_count_platoon_squad(platoon_number)
+
+    events = [Commands.Events.SET_SQUAD_1, Commands.Events.SET_SQUAD_2, Commands.Events.SET_SQUAD_3]
+
+    for squad_num in range(count_squad):
+        markup.add(InlineKeyboardButton(squad_num + 1, callback_data=events[squad_num]))
+
+    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: True)
+@check_connection_with_server(bot=bot)
 def handler_callbacks(call: types.CallbackQuery):
     if call.data in edit_users.keys():
         telegram_id = int(call.data)
         listener_edit_user[get_telegram_id(call.message)] = telegram_id
         handler_edit_user(call)
-    elif call.data == Commands.Events.EditUser.SQUAD:
-        bot.send_message(call.message.chat.id, Message.EditSquadUserState.EDIT)
-
-        state = FiniteStateMachineEditSquadUser(get_user(get_telegram_id(call.message)))
-
-        fsm_worker.set_fsm_obj(get_telegram_id(call.message), state)
+    # elif call.data == Commands.Events.EditUser.SQUAD:
+    #     bot.send_message(call.message.chat.id, Message.EditSquadUserState.EDIT)
+    #
+    #     state = FiniteStateMachineEditSquadUser(get_user(get_telegram_id(call.message)))
+    #
+    #     fsm_worker.set_fsm_obj(get_telegram_id(call.message), state)
 
 
 def handler_edit_user(call):
@@ -387,6 +451,7 @@ def handler_edit_user(call):
     markup.add(InlineKeyboardButton(Message.EditUser.SQUAD, callback_data=Commands.Events.EditUser.SQUAD))
     markup.add(InlineKeyboardButton(Message.EditUser.ATTEND, callback_data=Commands.Events.EditUser.ATTEND))
 
+    bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     bot.send_message(chat_id=call.message.chat.id, text=Message.EditUser.MAIN, reply_markup=markup)
 
 
