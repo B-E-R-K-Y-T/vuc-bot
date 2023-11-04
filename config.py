@@ -13,16 +13,34 @@ LOG_MODE = True
 # Максимальный размер логов (для отдельного юзера!) (Если указать -1, то размер будет бесконечным)
 MAX_SIZE_KB_LOG = int(os.getenv('MAX_SIZE_KB_LOG'))
 PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
-ENUM_TYPE_TOKEN = ('Студент', 'Командир отделения', 'Командир взвода')
+ROLES = ('Студент', 'Командир отделения', 'Командир взвода')
 # Режим дебага. Никаких ролей и безопасности(Если True, то он включен)
 DEBUG = False
+PRINT_DEBUG = True
 CRUD_ADDRESS = os.getenv('CRUD_ADDRESS')
 
 
 class Role:
-    STUDENT = ENUM_TYPE_TOKEN[0]
-    COMMANDER_SQUAD = ENUM_TYPE_TOKEN[1]
-    COMMANDER_PLATOON = ENUM_TYPE_TOKEN[2]
+    STUDENT = ROLES[0]
+    COMMANDER_SQUAD = ROLES[1]
+    COMMANDER_PLATOON = ROLES[2]
+    ADMIN = 'Admin'
+
+
+class UserAttribute:
+    NAME = 'ФИО'
+    DOB = 'Дата рождения'
+    PHONE_NUMBER = 'Номер телефона'
+    MAIL = 'Почта'
+    ADDRESS = 'Адрес'
+    INSTITUTE = 'Институт'
+    DOS = 'Направление'
+    GROUP_STUDY = 'Группа'
+    # COURSE_NUMBER = 'Номер курса'
+    VUS = 'ВУС'
+    PLATOON = 'Взвод'
+    SQUAD = 'Отделение'
+    COMMANDER = 'Командир'
 
 
 class Commands:
@@ -79,6 +97,7 @@ class Message:
     CANCEL_STEP_PROCESS = 'Действие отменено.'
     SUCCESSFUL = 'Успешно!'
     SELECT_SQUAD = 'Выберете отделение: '
+    ATTRS_PLATOON = 'Введите данные по взводу: Номер взвода, ВУС, семестр(в ВУЦ)'
 
     class EditUser:
         MAIN = 'Какой параметр Вы хотите поменять?'
@@ -109,7 +128,7 @@ class Message:
         FINAL = 'Регистрация окончена. Сохраняю данные...'
 
     class GetToken:
-        TYPE_TOKEN = f'Для кого Вы хотите сгенерировать токены?\n\n{ENUM_TYPE_TOKEN}'
+        TYPE_TOKEN = f'Для кого Вы хотите сгенерировать токены?\n\n{ROLES}'
         AMOUNT_TOKEN = ('Сколько токенов сгенерировать?'
                         '\n\nЖелательно генерировать строго под кол-во людей во взводе, чтобы не было путаницы.')
         FINAL = 'Токены готовы!'
@@ -138,7 +157,7 @@ class Message:
         SQUAD = 'Номер отделения должен состоять из цифр, а также должен быть в промежутке от 1 до 3'
         AMOUNT_TOKEN = 'Введите количество токенов цифрой!'
         AMOUNT_TOKEN_MAX = f'Можно указать только от 1 до {MAX_AMOUNT_TOKEN} токенов!'
-        TYPE_TOKEN = f'Тип токена может быть только таким: {ENUM_TYPE_TOKEN}'
+        TYPE_TOKEN = f'Тип токена может быть только таким: {ROLES}'
         NOTHING_CANCEL_STEP_PROCESS = f'Нечего отменять.'
         DEFAULT_ERROR = 'Ошибка!'
         PLATOON_COMMANDER_ERROR = 'У данного взвода уже есть командир!'
@@ -154,7 +173,9 @@ class EndPoint:
     GET_FREE_TOKEN = '/get_free_token'
     GET_LOGINS = '/get_login_users'
     GET_ADMINS = '/get_admins_users'
+    AUTH = '/auth'
     LOGIN = '/login'
+    ADD_PLATOON = '/add_platoon'
     ATTACH_TOKEN = '/attach_token'
     BAN_USER = '/ban_user'
     GET_LEN_TOKEN = '/get_len_token'
@@ -163,6 +184,7 @@ class EndPoint:
     GET_ROLE = '/get_role'
     DELETE_USER = '/del_user'
     GET_USER = '/get_user'
+    GET_USER_TG = '/get_user_tg'
     GET_PLATOON_COMMANDER = '/get_platoon_commander'
     GET_PLATOON = '/get_platoon'
     GET_COUNT_PLATOON_SQUAD = '/get_count_squad_in_platoon'

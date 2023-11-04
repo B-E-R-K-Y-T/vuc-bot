@@ -49,6 +49,7 @@ import requests
 
 from enum import auto, Enum, unique
 from config import CRUD_ADDRESS, EndPoint, Message
+from utils.logger import debug
 
 
 def _check_connection(func):
@@ -117,7 +118,15 @@ class ServerWorker:
         else:
             return Status.ERROR
 
+    def login(self, token: str):
+        res = requests.get(url=f'{self.address}{EndPoint.LOGIN}', params={'token': token})
+
+        if res.status_code == 200:
+            return int(res.text)
+
     def get_free_tokens(self):
+        raise Exception('Устарело')
+
         res = requests.get(url=f'{self.address}{EndPoint.GET_FREE_TOKEN}')
 
         if res.status_code == 200:
@@ -132,9 +141,20 @@ class ServerWorker:
             return Status.ERROR
 
     def get_user(self, telegram_id: int):
+        raise Exception('Временно устарело')
+
         res = requests.get(url=f'{self.address}{EndPoint.GET_USER}', params={'telegram_id': telegram_id})
 
         if res.status_code == 200:
+            return [token for token in res.text.split('&') if token]
+
+    def get_user_tg(self, telegram_id: int):
+        res = requests.get(url=f'{self.address}{EndPoint.GET_USER_TG}', params={'telegram_id': telegram_id})
+
+        if res.status_code == 200:
+            if res.text == '-1':
+                return Status.ERROR
+
             return [token for token in res.text.split('&') if token]
 
     def attach_user_to_attendance(self, telegram_id: int):
@@ -157,7 +177,15 @@ class ServerWorker:
     def save_user(self, data):
         res = requests.get(url=f'{self.address}{EndPoint.SAVE_USER}', params=data)
 
-        if res.status_code == 200 and res.text == '0':
+        if res.status_code == 200:
+            return res.text
+
+    def add_platoon(self, platoon_num: int, vus: int, semester: int):
+        res = requests.get(url=f'{self.address}{EndPoint.ADD_PLATOON}', params={'platoon_number': platoon_num,
+                                                                                'vus': vus,
+                                                                                'semester': semester})
+
+        if res.status_code == 200:
             return Status.OK
         else:
             return Status.ERROR
@@ -177,10 +205,15 @@ class ServerWorker:
     def get_role(self, telegram_id: int):
         res = requests.get(url=f'{self.address}{EndPoint.GET_ROLE}', params={'telegram_id': telegram_id})
 
+        debug(f'{res.text=}')
+
         if res.status_code == 200:
+            if res.text == 'None':
+                return Status.ERROR
+
             return res.text
 
-    def get_admin_users(self):
+    def check_admin(self, telegram_id: int):
         res = requests.get(url=f'{self.address}{EndPoint.GET_ADMINS}')
 
         if res.status_code == 200:

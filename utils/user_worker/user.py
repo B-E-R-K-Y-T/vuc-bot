@@ -19,7 +19,8 @@
 
 import uuid
 
-from utils.server_worker.server_worker import ServerWorker
+from utils.logger import debug
+from utils.server_worker.server_worker import ServerWorker, Status
 
 users = {}
 
@@ -67,12 +68,13 @@ class User:
         return ServerWorker().get_role(self.__telegram_id)
 
     def write_data(self):
-        print(self.writer.get_data())
+        debug(self.writer.get_data())
         (self.name, self.date_of_brith, self.phone_number, self.mail, self.address,
          self.institute, self.direction_of_study, self.group_study, self.course_number,
          self.vus, self.platoon, self.squad) = self.writer.get_data()
 
-        ServerWorker().attach_user_to_attendance(self.__telegram_id)
+        ServerWorker().add_platoon(int(self.platoon), int(self.vus), 1)
+        # ServerWorker().attach_user_to_attendance(self.__telegram_id)
 
         params = {
             'name': self.name,
@@ -102,9 +104,9 @@ class User:
         return self.writer.get_data()
 
     def __str__(self):
-        res = ServerWorker().get_user(self.__telegram_id)
-        print(res)
-        attrs = res if res else [None for _ in range(12)]
+        res = ServerWorker().get_user_tg(self.__telegram_id)
+        debug(res)
+        attrs = res if res else [None for _ in range(100)]
 
         res = (f'ФИО: {attrs[0]}\n'
                f'Дата рождения: {attrs[1]}\n'
@@ -149,9 +151,9 @@ class WriterData:
 def save_user(func):
     def wrapper(message, *args, **kwargs):
         telegram_id = message.chat.id
-        user = ServerWorker().get_user(telegram_id)
+        user = ServerWorker().get_user_tg(telegram_id)
 
-        if user and not get_user(telegram_id):
+        if user != Status.ERROR and not get_user(telegram_id):
             usr = User(telegram_id)
 
             for attr in user:

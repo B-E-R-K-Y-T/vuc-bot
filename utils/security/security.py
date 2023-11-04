@@ -14,7 +14,8 @@ config: Импортирует константы Message и DEBUG, которы
 
 utils.server_worker.server_worker: Импортирует класс ServerWorker из модуля server_worker, который используется для проверки доступа к серверным данным."""
 
-from config import Message, DEBUG
+from config import Message, DEBUG, ROLES, Role
+from utils.logger import debug
 from utils.server_worker.server_worker import ServerWorker
 
 
@@ -27,11 +28,12 @@ class Security:
             if DEBUG:
                 return func(message, *args, **kwargs)
 
-            login_users = ServerWorker().get_login_users()
-            admin_users = ServerWorker().get_admin_users()
+            tele_id = message.chat.id
+            role = ServerWorker().get_role(tele_id)
 
-            if (message.chat.id in login_users or
-                message.chat.id in admin_users):
+            debug(role)
+
+            if role in ROLES or role == Role.ADMIN:
                 return func(message, *args, **kwargs)
             else:
                 self.bot.reply_to(message, Message.ACCESS_DENIED)
@@ -43,7 +45,12 @@ class Security:
             if DEBUG:
                 return func(message, *args, **kwargs)
 
-            if message.chat.id in ServerWorker().get_admin_users():
+            tele_id = message.chat.id
+            role = ServerWorker().get_role(tele_id)
+
+            debug(role)
+
+            if role == Role.ADMIN:
                 return func(message, *args, **kwargs)
             else:
                 self.bot.reply_to(message, Message.ACCESS_DENIED)

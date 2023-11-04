@@ -51,7 +51,12 @@ def process_message(message):
 import datetime
 import os
 
-from config import LOG_MODE, MAX_SIZE_KB_LOG, PATH_TO_LOG_DIR
+from config import LOG_MODE, MAX_SIZE_KB_LOG, PATH_TO_LOG_DIR, PRINT_DEBUG
+
+
+def debug(*args, **kwargs):
+    if PRINT_DEBUG:
+        print('DEBUG: ', *args, **kwargs)
 
 
 def log(func):

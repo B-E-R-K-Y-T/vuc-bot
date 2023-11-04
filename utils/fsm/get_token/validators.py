@@ -1,4 +1,4 @@
-from config import Message, MAX_AMOUNT_TOKEN, ENUM_TYPE_TOKEN
+from config import Message, MAX_AMOUNT_TOKEN, ROLES
 from utils.fsm.validators_worker import ValidatorWorker
 from utils.fsm.get_token.states import GetTokenState
 from utils.exceptions import TokenException
@@ -16,7 +16,7 @@ def validator_amount_token(text: str):
 
 @vw.attach_validator(GetTokenState.TYPE_TOKEN)
 def validator_type_token(text: str):
-    if text.capitalize() not in ENUM_TYPE_TOKEN:
+    if text.capitalize() not in ROLES:
         raise TokenException(Message.Error.TYPE_TOKEN)
 
 

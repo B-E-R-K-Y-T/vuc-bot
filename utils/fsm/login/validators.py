@@ -13,7 +13,7 @@ def validator_login(text: str):
 
     if len(text) != max_len:
         raise TokenException(f'{Message.Error.ERROR_LEN_TOKEN}{max_len}')
-    elif text not in ServerWorker().get_free_tokens():
+    elif ServerWorker().login(text) != 1:
         raise TokenException(Message.Error.INVALID_TOKEN)
 
 

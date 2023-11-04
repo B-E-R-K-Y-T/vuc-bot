@@ -30,12 +30,13 @@
 
 """
 
+import pandas as pd
 import datetime
 import telebot
 
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import TELEGRAM_BOT_TOKEN, Message, Commands, Role
+from config import TELEGRAM_BOT_TOKEN, Message, Commands, Role, UserAttribute
 from utils.fsm.upload.upload_fsm import FiniteStateMachineUpload
 from utils.fsm.upload.states import UPLOAD_PLATOON_MSG_STATES
 from utils.fsm.upload.validators import UPLOAD_VALIDATORS
@@ -47,7 +48,7 @@ from utils.fsm.login.states import LoginState, LOGIN_MSG_STATES
 from utils.fsm.registrarion.states import REGISTRATION_MSG_STATES, RegistrationStates
 from utils.fsm.upload.states import UploadState
 from utils.security.security import Security
-from utils.logger import log
+from utils.logger import log, debug
 from utils.server_worker.server_worker import ServerWorker, Status, check_connection_with_server
 from utils.user_worker.edit_user import ListenerEditUser
 from utils.user_worker.user import save_user, get_telegram_id, get_user
@@ -347,7 +348,7 @@ def handler_message(message):
         handler_edit_squad_user(user, message)
     elif isinstance(user.state, UploadState):
         # Обработка редактирования файла взвода
-        handler_edit_squad_user(user, message)
+        handler_upload_platoon(user, message)
     else:
         # Ответ по умолчанию от бота
         bot.reply_to(message, Message.DEFAULT)
@@ -470,19 +471,70 @@ def handle_excel_platoon(message):
         user = get_user(get_telegram_id(message))
 
         if user.state == UploadState.UPLOAD_FILE:
-            chat_id = message.chat.id
-
             file_info = bot.get_file(message.document.file_id)
             downloaded_file = bot.download_file(file_info.file_path)
+            debug(message.text)
+            df = pd.read_excel(downloaded_file)
+            df.columns = df.columns.map(lambda x: x.strip())
 
-            src = message.document.file_name
+            data_user = {}
+            users = []
 
-            with open(src, 'wb') as new_file:
-                new_file.write(downloaded_file)
+            for offset, (idx, row) in enumerate(df.iterrows()):
+                data_user['name'] = row[UserAttribute.NAME]
+                data_user['date_of_birth'] = row[UserAttribute.DOB]
+                data_user['phone_number'] = row[UserAttribute.PHONE_NUMBER]
+                data_user['mail'] = row[UserAttribute.MAIL]
+                data_user['address'] = row[UserAttribute.ADDRESS]
+                data_user['institute'] = row[UserAttribute.INSTITUTE]
+                data_user['direction_of_study'] = row[UserAttribute.DOS]
+                data_user['group_study'] = row[UserAttribute.GROUP_STUDY]
+                try:
+                    data_user['squad'] = int(row[UserAttribute.SQUAD])
+                except ValueError as _:
+                    data_user['squad'] = None
+                if data_user['squad']:
+                    data_user['role'] = Role.COMMANDER_SQUAD if row[UserAttribute.COMMANDER] == '+' else Role.STUDENT
+                elif data_user['squad'] is None and row[UserAttribute.COMMANDER] == '+':
+                    data_user['role'] = Role.COMMANDER_PLATOON
+                else:
+                    data_user['role'] = Role.STUDENT
 
-            bot.reply_to(message, "Пожалуй, я сохраню это")
+                users.append(data_user)
+
+            bot.send_message(get_telegram_id(message), Message.ATTRS_PLATOON)
+            bot.register_next_step_handler(message, save_users_from_file, users, row)
+            user.state = None
+
     except Exception as e:
-        bot.reply_to(message, e)
+        bot.reply_to(message, repr(e))
+
+
+def save_users_from_file(message, users, row):
+    res_msg = ''
+    current_user = get_user(get_telegram_id(message))
+
+    try:
+        platoon_num, vus, semester = message.text.split(',')
+        res = ServerWorker().add_platoon(int(platoon_num), int(vus), int(semester))
+    except ValueError as _:
+        bot.reply_to(message, Message.Error.DEFAULT_ERROR)
+        current_user.state = None
+        return
+
+    if res == Status.OK:
+        for offset, user in enumerate(users):
+            user['platoon_number'] = platoon_num
+            res = ServerWorker().save_user(user)
+
+            if res:
+                res_msg += f'{offset}) {row[UserAttribute.NAME]} Токен: {res}\n\n'
+            else:
+                res_msg += f'{offset}) {row[UserAttribute.NAME]} {Message.Error.DEFAULT_ERROR}\n\n'
+
+        bot.reply_to(message, res_msg)
+    else:
+        bot.reply_to(message, Message.Error.DEFAULT_ERROR)
 
 
 def handler_edit_user(call):
@@ -512,7 +564,7 @@ def handler_registration(user, message):
         if user.state == RegistrationStates.FINAL:
             res = user.write_data()
 
-            if res == Status.OK:
+            if res:
                 bot.send_message(get_telegram_id(message), Message.SUCCESSFUL)
             else:
                 bot.send_message(get_telegram_id(message), Message.Error.DEFAULT_ERROR)
@@ -558,10 +610,9 @@ def handler_upload_platoon(user, message):
 
     if res:
         if user.state == UploadState.FINAL:
-
             user.state = None
 
-            # bot.reply_to(message, Message.SUCCESSFUL)
+            bot.reply_to(message, Message.SUCCESSFUL)
 
 
 def handler_login(user, message):
@@ -569,15 +620,16 @@ def handler_login(user, message):
 
     if res:
         if user.state == LoginState.FINAL:
-            if get_telegram_id(message) in ServerWorker().get_login_users():
+            if ServerWorker().get_role(get_telegram_id(message)) != Status.ERROR:
                 bot.reply_to(message, Message.Error.USER_ALREADY_EXISTS)
                 user.state = None
                 return
-            elif get_telegram_id(message) in ServerWorker().get_admin_users():
+            elif ServerWorker().get_role(get_telegram_id(message)) != Status.ERROR:
                 bot.reply_to(message, Message.Error.USER_ALREADY_EXISTS)
                 user.state = None
                 return
 
+            debug('Сохранение юзера.')
             respond = ServerWorker().attach_token_to_user(get_telegram_id(message), message.text)
 
             if respond == Status.OK:
