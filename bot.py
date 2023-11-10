@@ -527,7 +527,7 @@ def save_users_from_file(message, users, row):
         debug(f'{users=}')
 
         for offset, user in enumerate(users):
-            user['platoon'] = platoon_num
+            user['platoon_number'] = platoon_num
             res = ServerWorker().save_user(user)
 
             if res:
