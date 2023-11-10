@@ -71,7 +71,7 @@ def log(func):
             with open(file=path, mode='a', encoding='utf-8') as file:
                 file.write(text)
 
-            _clear_logs_file(path)
+            _clear_logs_file_if_full(path)
 
         return func(message, *args, **kwargs)
 
@@ -82,7 +82,7 @@ def _get_max_size_log():
     return MAX_SIZE_KB_LOG * 1024
 
 
-def _clear_logs_file(file):
+def _clear_logs_file_if_full(file):
     stats = os.stat(file)
 
     if stats.st_size >= _get_max_size_log() and MAX_SIZE_KB_LOG != -1:

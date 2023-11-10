@@ -129,7 +129,7 @@ def command_get_platoon(message: types.Message):
 @log
 @check_connection_with_server(bot=bot)
 @save_user
-@security.is_login
+@security.is_login # мы пытаемся зарегать пользователя, откуда у него токен?
 def command_reg(message):
     """Функция `command_reg` является обработчиком команды REG. Она выполняет следующие действия:
 
@@ -317,7 +317,7 @@ def handler_message_loging_process(message):
 @bot.message_handler(func=lambda m: True)
 @check_connection_with_server(bot=bot)
 @save_user
-@security.is_login
+# @security.is_login
 def handler_message(message):
     """
     Обрабатывает сообщения пользователя и выполняет соответствующие действия в зависимости от состояния пользователя.
@@ -477,25 +477,25 @@ def handle_excel_platoon(message):
             df = pd.read_excel(downloaded_file)
             df.columns = df.columns.map(lambda x: x.strip())
 
-            data_user = {}
             users = []
+            row = None
 
-            for offset, (idx, row) in enumerate(df.iterrows()):
-                data_user['name'] = row[UserAttribute.NAME]
-                data_user['date_of_birth'] = row[UserAttribute.DOB]
-                data_user['phone_number'] = row[UserAttribute.PHONE_NUMBER]
-                data_user['mail'] = row[UserAttribute.MAIL]
-                data_user['address'] = row[UserAttribute.ADDRESS]
-                data_user['institute'] = row[UserAttribute.INSTITUTE]
-                data_user['direction_of_study'] = row[UserAttribute.DOS]
-                data_user['group_study'] = row[UserAttribute.GROUP_STUDY]
+            for offset, (idx, _row) in enumerate(df.iterrows()):
+                row = _row
+                data_user = {'name': _row[UserAttribute.NAME], 'date_of_birth': _row[UserAttribute.DOB],
+                             'phone_number': _row[UserAttribute.PHONE_NUMBER], 'mail': _row[UserAttribute.MAIL],
+                             'address': _row[UserAttribute.ADDRESS], 'institute': _row[UserAttribute.INSTITUTE],
+                             'direction_of_study': _row[UserAttribute.DOS],
+                             'group_study': _row[UserAttribute.GROUP_STUDY]}
+
                 try:
-                    data_user['squad'] = int(row[UserAttribute.SQUAD])
+                    data_user['squad'] = int(_row[UserAttribute.SQUAD])
                 except ValueError as _:
                     data_user['squad'] = None
+
                 if data_user['squad']:
-                    data_user['role'] = Role.COMMANDER_SQUAD if row[UserAttribute.COMMANDER] == '+' else Role.STUDENT
-                elif data_user['squad'] is None and row[UserAttribute.COMMANDER] == '+':
+                    data_user['role'] = Role.COMMANDER_SQUAD if _row[UserAttribute.COMMANDER] == '+' else Role.STUDENT
+                elif data_user['squad'] is None and _row[UserAttribute.COMMANDER] == '+':
                     data_user['role'] = Role.COMMANDER_PLATOON
                 else:
                     data_user['role'] = Role.STUDENT
@@ -520,9 +520,12 @@ def save_users_from_file(message, users, row):
     except ValueError as _:
         bot.reply_to(message, Message.Error.DEFAULT_ERROR)
         current_user.state = None
+
         return
 
     if res == Status.OK:
+        debug(f'{users=}')
+
         for offset, user in enumerate(users):
             user['platoon_number'] = platoon_num
             res = ServerWorker().save_user(user)
