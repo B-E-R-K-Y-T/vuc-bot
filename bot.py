@@ -478,10 +478,8 @@ def handle_excel_platoon(message):
             df.columns = df.columns.map(lambda x: x.strip())
 
             users = []
-            row = None
 
             for offset, (idx, _row) in enumerate(df.iterrows()):
-                row = _row
                 data_user = {'name': _row[UserAttribute.NAME], 'date_of_birth': _row[UserAttribute.DOB],
                              'phone_number': _row[UserAttribute.PHONE_NUMBER], 'mail': _row[UserAttribute.MAIL],
                              'address': _row[UserAttribute.ADDRESS], 'institute': _row[UserAttribute.INSTITUTE],
@@ -503,14 +501,14 @@ def handle_excel_platoon(message):
                 users.append(data_user)
 
             bot.send_message(get_telegram_id(message), Message.ATTRS_PLATOON)
-            bot.register_next_step_handler(message, save_users_from_file, users, row)
+            bot.register_next_step_handler(message, save_users_from_file, users)
             user.state = None
 
     except Exception as e:
         bot.reply_to(message, repr(e))
 
 
-def save_users_from_file(message, users, row):
+def save_users_from_file(message, users):
     res_msg = ''
     current_user = get_user(get_telegram_id(message))
 
@@ -531,9 +529,9 @@ def save_users_from_file(message, users, row):
             res = ServerWorker().save_user(user)
 
             if res:
-                res_msg += f'{offset}) {row[UserAttribute.NAME]} Токен: {res}\n\n'
+                res_msg += f'{offset}) {user[UserAttribute.NAME]} Токен: {res}\n\n'
             else:
-                res_msg += f'{offset}) {row[UserAttribute.NAME]} {Message.Error.DEFAULT_ERROR}\n\n'
+                res_msg += f'{offset}) {user[UserAttribute.NAME]} {Message.Error.DEFAULT_ERROR}\n\n'
 
         bot.reply_to(message, res_msg)
     else:
