@@ -69,6 +69,7 @@ class User:
 
     def write_data(self):
         debug(self.writer.get_data())
+
         (self.name, self.date_of_brith, self.phone_number, self.mail, self.address,
          self.institute, self.direction_of_study, self.group_study, self.course_number,
          self.vus, self.platoon, self.squad) = self.writer.get_data()

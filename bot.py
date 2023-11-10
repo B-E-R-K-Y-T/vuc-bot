@@ -563,14 +563,41 @@ def handler_registration(user, message):
                     return
 
         if user.state == RegistrationStates.FINAL:
-            res = user.write_data()
+            token = add_user(user, message)
 
-            if res:
-                bot.send_message(get_telegram_id(message), Message.SUCCESSFUL)
+            if token:
+                bot.send_message(get_telegram_id(message), f'{Message.SUCCESSFUL} Токен: {token}')
             else:
                 bot.send_message(get_telegram_id(message), Message.Error.DEFAULT_ERROR)
 
             user.state = None
+
+
+def add_user(user, message):
+    (name, date_of_brith, phone_number, mail, address,
+     institute, direction_of_study, group_study, course_number,
+     vus, platoon, squad) = user.writer.get_data()
+
+    ServerWorker().add_platoon(int(platoon), int(vus), 1)
+
+    params = {
+        'name': name,
+        'date_of_brith': date_of_brith,
+        'phone_number': phone_number,
+        'mail': mail,
+        'address': address,
+        'institute': institute,
+        'direction_of_study': direction_of_study,
+        'group_study': group_study,
+        'course_number': course_number,
+        'vus': vus,
+        'platoon': platoon,
+        'squad': squad,
+        'telegram_id': get_telegram_id(message),
+        'role': ServerWorker().get_role(telegram_id=get_telegram_id(message)),
+    }
+
+    return ServerWorker().save_user(params)
 
 
 def handler_get_token(user, message):
