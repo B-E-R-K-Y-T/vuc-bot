@@ -560,6 +560,7 @@ def handler_registration(user, message):
                     bot.reply_to(message, Message.Error.PLATOON_COMMANDER_ERROR)
                     user.writer.old_data()
                     command_cancel(message)
+
                     return
 
         if user.state == RegistrationStates.FINAL:
@@ -594,7 +595,7 @@ def add_user(user, message):
         'platoon': platoon,
         'squad': squad,
         'telegram_id': get_telegram_id(message),
-        'role': ServerWorker().get_role(telegram_id=get_telegram_id(message)),
+        'role': Role.STUDENT,
     }
 
     return ServerWorker().save_user(params)
