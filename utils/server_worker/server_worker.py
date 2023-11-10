@@ -180,8 +180,8 @@ class ServerWorker:
         if res.status_code == 200:
             return res.text
 
-    def add_platoon(self, platoon_num: int, vus: int, semester: int):
-        res = requests.get(url=f'{self.address}{EndPoint.ADD_PLATOON}', params={'platoon_number': platoon_num,
+    def add_platoon(self, platoon_number: int, vus: int, semester: int):
+        res = requests.get(url=f'{self.address}{EndPoint.ADD_PLATOON}', params={'platoon_number': platoon_number,
                                                                                 'vus': vus,
                                                                                 'semester': semester})
 
