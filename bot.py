@@ -36,7 +36,7 @@ import telebot
 
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import TELEGRAM_BOT_TOKEN, Message, Commands, Role, UserAttribute
+from config import TELEGRAM_BOT_TOKEN, Message, Commands, Role, UserAttribute, MenuButtons
 from utils.fsm.upload.upload_fsm import FiniteStateMachineUpload
 from utils.fsm.upload.states import UPLOAD_PLATOON_MSG_STATES
 from utils.fsm.upload.validators import UPLOAD_VALIDATORS
@@ -85,6 +85,40 @@ def send_welcome(message):
     bot.send_message(message.chat.id, Message.WELCOME)
 
 
+@bot.message_handler(commands=[Commands.MENU])
+@log
+# @check_connection_with_server(bot=bot)
+# @save_user
+# @security.is_login
+def menu(message):
+    user = get_user(get_telegram_id(message))
+    markup = InlineKeyboardMarkup()
+
+    if Role.STUDENT == Role.STUDENT:
+        buttons = (MenuButtons.EVALUATION, MenuButtons.ATTENDANCE, MenuButtons.PERSONAL_DATA)
+
+        for button in buttons:
+            markup.add(InlineKeyboardButton(button, callback_data="..."))
+
+    bot.send_message(chat_id=message.chat.id, text=Message.SELECT_SQUAD, reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == '...')
+# @check_connection_with_server(bot=bot)
+def TEST(call: types.CallbackQuery):
+    message = call.message
+    user = get_user(get_telegram_id(message))
+    markup = InlineKeyboardMarkup()
+
+    if Role.STUDENT == Role.STUDENT:
+        buttons = (MenuButtons.EDIT, MenuButtons.BACK)
+
+        for button in buttons:
+            markup.add(InlineKeyboardButton(button, callback_data="1"))
+
+    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.id, reply_markup=markup)
+
+
 @bot.message_handler(commands=[Commands.GET_PLATOON])
 @log
 @check_connection_with_server(bot=bot)
@@ -129,7 +163,7 @@ def command_get_platoon(message: types.Message):
 @log
 @check_connection_with_server(bot=bot)
 @save_user
-@security.is_login # мы пытаемся зарегать пользователя, откуда у него токен?
+@security.is_login  # мы пытаемся зарегать пользователя, откуда у него токен?
 def command_reg(message):
     """Функция `command_reg` является обработчиком команды REG. Она выполняет следующие действия:
 
@@ -613,7 +647,7 @@ def handler_get_token(user, message):
             msg = ''
 
             for offset, token in enumerate(ServerWorker().get_tokens(*token_handler.get_token_params())):
-                msg += f'{offset+1}) {token}\n\n'
+                msg += f'{offset + 1}) {token}\n\n'
 
             bot.send_message(get_telegram_id(message), msg)
 

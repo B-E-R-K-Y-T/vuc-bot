@@ -2,9 +2,9 @@ import re
 import string
 
 from config import Message, MINIUM_AGE_ENTRANCE
-from utils.exceptions import NameException, DateException, PhoneException, MailException, InstituteException, \
-    AddressException, CourseNumberException, VusException, DirectionOfStudyException, GroupStudyException, \
-    PlatoonException, SquadException
+from utils.exceptions import (NameException, DateException, PhoneException, MailException, InstituteException,
+                              AddressException, CourseNumberException, VusException, DirectionOfStudyException,
+                              GroupStudyException, PlatoonException, SquadException)
 from datetime import datetime
 from utils.fsm.validators_worker import ValidatorWorker
 from utils.fsm.registrarion.states import RegistrationStates

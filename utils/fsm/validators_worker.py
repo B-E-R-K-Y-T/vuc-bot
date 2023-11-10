@@ -56,3 +56,4 @@ class ValidatorWorker:
 
     def get_validators(self):
         return self.validators
+

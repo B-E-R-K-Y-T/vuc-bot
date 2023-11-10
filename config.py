@@ -1,23 +1,30 @@
 import os
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+
 GOD_ID = os.getenv('GOD_ID')
 # telegram id админов
 ADMINS_ID = tuple(int(t_id) for t_id in os.getenv('ADMINS_ID').split(',') if t_id.isnumeric())
+
 # Минимальный возраст поступления на военную кафедру
 MINIUM_AGE_ENTRANCE = int(os.getenv('MINIUM_AGE_ENTRANCE'))
+
 # Максимальное кол-во токенов(Больше ставить не рекомендуется)
 MAX_AMOUNT_TOKEN = int(os.getenv('MAX_AMOUNT_TOKEN'))
+
 # Если False, то бот, не будет записывать в логи то, что пишет пользователь
 LOG_MODE = True
+
 # Максимальный размер логов (для отдельного юзера!) (Если указать -1, то размер будет бесконечным)
 MAX_SIZE_KB_LOG = int(os.getenv('MAX_SIZE_KB_LOG'))
 PATH_TO_LOG_DIR = os.getenv('PATH_TO_LOG_DIR')
-ROLES = ('Студент', 'Командир отделения', 'Командир взвода')
+
 # Режим дебага. Никаких ролей и безопасности(Если True, то он включен)
 DEBUG = False
 PRINT_DEBUG = True
 CRUD_ADDRESS = os.getenv('CRUD_ADDRESS')
+
+ROLES = ('Студент', 'Командир отделения', 'Командир взвода')
 
 
 class Role:
@@ -43,6 +50,30 @@ class UserAttribute:
     COMMANDER = 'Командир'
 
 
+class MenuButtons:
+    BACK = 'Назад'
+    EDIT = 'Изменить'
+    EVALUATION = 'Оценка'
+    ATTENDANCE = 'Посещаемость'
+    PERSONAL_DATA = 'Перс данные'
+    SQUAD = 'Отделения'
+
+
+class Menu:
+    class Student:
+        class Evaluation:
+            EDIT = MenuButtons.EDIT
+            BACK = MenuButtons.BACK
+
+        class Attendance:
+            EDIT = MenuButtons.EDIT
+            BACK = MenuButtons.BACK
+
+        class PersonalData:
+            EDIT = MenuButtons.EDIT
+            BACK = MenuButtons.BACK
+
+
 class Commands:
     START = 'start'
     HELP = 'help'
@@ -56,6 +87,7 @@ class Commands:
     GET_PLATOON = 'get_platoon'
     ATTEND = 'attend'
     UPLOAD_PLATOON = 'upload_platoon'
+    MENU = 'menu'
     # TODO: Реализовать!
     LATE = 'late'
     GET_ROLE = 'get_role'
