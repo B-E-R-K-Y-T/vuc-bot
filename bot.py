@@ -129,7 +129,7 @@ def command_get_platoon(message: types.Message):
 @log
 @check_connection_with_server(bot=bot)
 @save_user
-# @security.is_login # мы пытаемся зарегать пользователя, откуда у него токен?
+@security.is_login
 def command_reg(message):
     """Функция `command_reg` является обработчиком команды REG. Она выполняет следующие действия:
 
@@ -317,7 +317,7 @@ def handler_message_loging_process(message):
 @bot.message_handler(func=lambda m: True)
 @check_connection_with_server(bot=bot)
 @save_user
-# @security.is_login
+@security.is_login
 def handler_message(message):
     """
     Обрабатывает сообщения пользователя и выполняет соответствующие действия в зависимости от состояния пользователя.
@@ -477,11 +477,10 @@ def handle_excel_platoon(message):
             df = pd.read_excel(downloaded_file)
             df.columns = df.columns.map(lambda x: x.strip())
 
+            data_user = {}
             users = []
 
             for offset, (idx, row) in enumerate(df.iterrows()):
-                data_user = {}
-
                 data_user['name'] = row[UserAttribute.NAME]
                 data_user['date_of_birth'] = row[UserAttribute.DOB]
                 data_user['phone_number'] = row[UserAttribute.PHONE_NUMBER]
