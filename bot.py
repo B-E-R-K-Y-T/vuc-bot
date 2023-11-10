@@ -529,9 +529,9 @@ def save_users_from_file(message, users):
             res = ServerWorker().save_user(user)
 
             if res:
-                res_msg += f'{offset}) {user[UserAttribute.NAME]} Токен: {res}\n\n'
+                res_msg += f'{offset}) {user['name']} Токен: {res}\n\n'
             else:
-                res_msg += f'{offset}) {user[UserAttribute.NAME]} {Message.Error.DEFAULT_ERROR}\n\n'
+                res_msg += f'{offset}) {user['name']} {Message.Error.DEFAULT_ERROR}\n\n'
 
         bot.reply_to(message, res_msg)
     else:
