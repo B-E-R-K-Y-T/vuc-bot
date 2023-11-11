@@ -36,7 +36,7 @@ import telebot
 
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import TELEGRAM_BOT_TOKEN, Message, Commands, Role, UserAttribute, MenuButtons
+from config import TELEGRAM_BOT_TOKEN, Message, Commands, Role, UserAttribute, MenuButtons, MenuEvent
 from utils.fsm.upload.upload_fsm import FiniteStateMachineUpload
 from utils.fsm.upload.states import UPLOAD_PLATOON_MSG_STATES
 from utils.fsm.upload.validators import UPLOAD_VALIDATORS
@@ -71,6 +71,7 @@ listener_edit_user = ListenerEditUser()
 
 @bot.message_handler(commands=[Commands.START, Commands.HELP])
 @log
+@check_connection_with_server(bot=bot)
 @save_user
 def send_welcome(message):
     """
@@ -82,7 +83,11 @@ def send_welcome(message):
     4. Сохраняет информацию о пользователе с помощью декоратора `@save_user`.
     """
 
-    bot.send_message(message.chat.id, Message.WELCOME)
+    keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=False, one_time_keyboard=True)
+    main_menu = types.KeyboardButton(text=f'/{Commands.MENU}')
+    keyboard.add(main_menu)
+
+    bot.send_message(message.chat.id, Message.WELCOME, reply_markup=keyboard)
 
 
 @bot.message_handler(commands=[Commands.MENU])
@@ -92,31 +97,81 @@ def send_welcome(message):
 # @security.is_login
 def menu(message):
     user = get_user(get_telegram_id(message))
-    markup = InlineKeyboardMarkup()
 
-    if Role.STUDENT == Role.STUDENT:
-        buttons = (MenuButtons.EVALUATION, MenuButtons.ATTENDANCE, MenuButtons.PERSONAL_DATA)
+    if Role.STUDENT == Role.STUDENT and True:
+        buttons = {
+            MenuEvent.Student.EVALUATION: MenuButtons.Text.EVALUATION,
+            MenuEvent.Student.ATTENDANCE: MenuButtons.Text.ATTENDANCE,
+            MenuEvent.Student.PERSONAL_DATA: MenuButtons.Text.PERSONAL_DATA,
+        }
 
-        for button in buttons:
-            markup.add(InlineKeyboardButton(button, callback_data="..."))
+        menu_generator(message, buttons, Message.SUCCESSFUL)
+    elif Role.COMMANDER_PLATOON == Role.COMMANDER_PLATOON and False:
+        buttons = {
+            MenuEvent.CommanderPlatoon.ATTENDANCE: MenuButtons.Text.ATTENDANCE,
+        }
 
-    bot.send_message(chat_id=message.chat.id, text=Message.SELECT_SQUAD, reply_markup=markup)
+        menu_generator(message, buttons, Message.SUCCESSFUL)
+    elif Role.ADMIN == Role.ADMIN:
+        buttons = {
+            '100': 100,
+            '101': 101,
+            '102': 102,
+        }
+
+        menu_generator(message, buttons, Message.SUCCESSFUL)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == '...')
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.MAIN_MENU)
 # @check_connection_with_server(bot=bot)
-def TEST(call: types.CallbackQuery):
+def back_menu(call: types.CallbackQuery):
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+    menu(call.message)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.Student.PERSONAL_DATA)
+# @check_connection_with_server(bot=bot)
+def student_pd(call: types.CallbackQuery):
+    buttons = {
+        MenuEvent.Student.PersonalData.EDIT: MenuButtons.Text.EDIT,
+        MenuEvent.Student.PersonalData.BACK: MenuButtons.Text.BACK,
+    }
+
+    menu_editor(call, buttons)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.Student.PersonalData.EDIT)
+# @check_connection_with_server(bot=bot)
+def student_pd(call: types.CallbackQuery):
     message = call.message
-    user = get_user(get_telegram_id(message))
-    markup = InlineKeyboardMarkup()
 
-    if Role.STUDENT == Role.STUDENT:
-        buttons = (MenuButtons.EDIT, MenuButtons.BACK)
+    command_reg(message)
+    bot.delete_message(call.message.chat.id, call.message.message_id)
 
-        for button in buttons:
-            markup.add(InlineKeyboardButton(button, callback_data="1"))
 
-    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.id, reply_markup=markup)
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.CommanderPlatoon.ATTENDANCE)
+# @check_connection_with_server(bot=bot)
+def student_pd(call: types.CallbackQuery):
+    message = call.message
+
+    command_get_platoon(message)
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.Student.ATTENDANCE)
+# @check_connection_with_server(bot=bot)
+def student_attendance(call: types.CallbackQuery):
+    message = call.message
+
+    bot.send_message(call.message.chat.id, Message.SUCCESSFUL)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.Student.EVALUATION)
+# @check_connection_with_server(bot=bot)
+def student_evaluation(call: types.CallbackQuery):
+    message = call.message
+
+    bot.send_message(call.message.chat.id, Message.SUCCESSFUL)
 
 
 @bot.message_handler(commands=[Commands.GET_PLATOON])
@@ -239,7 +294,7 @@ def command_stop_process(message):
 @save_user
 @security.is_login
 def command_self(message):
-    bot.reply_to(message, get_user(get_telegram_id(message)))
+    bot.reply_to(message, str(get_user(get_telegram_id(message))))
 
 
 @bot.message_handler(commands=[Commands.BAN_USER])
@@ -496,7 +551,7 @@ def handler_callbacks(call: types.CallbackQuery):
 
 @bot.message_handler(content_types=['document'])
 @log
-# @check_connection_with_server
+# @check_connection_with_server(bot=bot)
 @save_user
 @security.is_login
 @security.is_admin
@@ -735,6 +790,28 @@ def handler_select_squad(call, target_squad: str):
             markup.add(InlineKeyboardButton(user[0], callback_data=telegram_id))
 
     bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.id, reply_markup=markup)
+
+
+def menu_generator(message, buttons: dict, text: str):
+    markup = create_menu(buttons)
+
+    bot.send_message(chat_id=message.chat.id, text=text, reply_markup=markup)
+
+
+def menu_editor(call: types.CallbackQuery, buttons: dict):
+    markup = create_menu(buttons)
+
+    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.id, reply_markup=markup)
+
+
+def create_menu(buttons: dict):
+    markup = InlineKeyboardMarkup()
+
+    for event, text in buttons.items():
+        debug(text, event)
+        markup.add(InlineKeyboardButton(text, callback_data=event))
+
+    return markup
 
 
 bot.infinity_polling()

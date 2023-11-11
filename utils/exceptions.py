@@ -52,3 +52,7 @@ class PlatoonException(MainException):
 
 class SquadException(MainException):
     pass
+
+
+class MaxEventIndexException(MainException):
+    pass

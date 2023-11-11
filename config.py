@@ -1,5 +1,7 @@
 import os
 
+from utils.tools import auto_event_id
+
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 GOD_ID = os.getenv('GOD_ID')
@@ -51,27 +53,53 @@ class UserAttribute:
 
 
 class MenuButtons:
-    BACK = 'Назад'
-    EDIT = 'Изменить'
-    EVALUATION = 'Оценка'
-    ATTENDANCE = 'Посещаемость'
-    PERSONAL_DATA = 'Перс данные'
-    SQUAD = 'Отделения'
+    class Text:
+        BACK = 'Назад'
+        EDIT = 'Изменить'
+        EVALUATION = 'Оценка'
+        ATTENDANCE = 'Посещаемость'
+        PERSONAL_DATA = 'Перс данные'
+        SQUAD = 'Отделения'
+        MENU = 'Меню'
 
 
-class Menu:
+class _MenuGetEvent:
+    MENU_EVENT = auto_event_id()
+    STUDENT_EVALUATION = auto_event_id()
+    STUDENT_ATTENDANCE = auto_event_id()
+    STUDENT_PERSONAL_DATA = auto_event_id()
+    COMMANDER_PLATOON_ATTENDANCE = auto_event_id()
+    ADMIN_PLATOONS = auto_event_id()
+    PLATOON_TESTS = auto_event_id()
+    PLATOON_ATTENDANCE = auto_event_id()
+    PLATOON_PERSONNEL = auto_event_id()
+    PLATOON_COMMANDERS = auto_event_id()
+
+
+class MenuEvent:
+    MAIN_MENU = _MenuGetEvent.MENU_EVENT
+
     class Student:
-        class Evaluation:
-            EDIT = MenuButtons.EDIT
-            BACK = MenuButtons.BACK
-
-        class Attendance:
-            EDIT = MenuButtons.EDIT
-            BACK = MenuButtons.BACK
+        EVALUATION = _MenuGetEvent.STUDENT_EVALUATION
+        ATTENDANCE = _MenuGetEvent.STUDENT_ATTENDANCE
+        PERSONAL_DATA = _MenuGetEvent.STUDENT_PERSONAL_DATA
 
         class PersonalData:
-            EDIT = MenuButtons.EDIT
-            BACK = MenuButtons.BACK
+            EDIT = auto_event_id()
+            BACK = _MenuGetEvent.MENU_EVENT
+
+    class CommanderPlatoon:
+        ATTENDANCE = _MenuGetEvent.COMMANDER_PLATOON_ATTENDANCE
+
+    class Admin:
+        PLATOONS = _MenuGetEvent.ADMIN_PLATOONS
+
+        class Platoon:
+            TESTS = _MenuGetEvent.PLATOON_TESTS
+            ATTENDANCE = _MenuGetEvent.PLATOON_ATTENDANCE
+            PERSONNEL = _MenuGetEvent.PLATOON_PERSONNEL
+            COMMANDERS = _MenuGetEvent.PLATOON_COMMANDERS
+            BACK = _MenuGetEvent.MENU_EVENT
 
 
 class Commands:
