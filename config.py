@@ -61,6 +61,12 @@ class MenuButtons:
         PERSONAL_DATA = 'Перс данные'
         SQUAD = 'Отделения'
         MENU = 'Меню'
+        STUDENT_MENU = 'Меню студента'
+        PLATOON_COMMANDER_MENU = 'Меню командира взвода'
+        SQUAD_COMMANDER_MENU = 'Меню командира отделения'
+        ADMIN_COMMANDER_MENU = 'Меню администратора'
+        ADD_STUDENT = 'Добавить студента'
+        SQUADS_LIST_MENU = 'Меню отделений'
 
 
 class _MenuGetEvent:
@@ -74,22 +80,44 @@ class _MenuGetEvent:
     PLATOON_ATTENDANCE = auto_event_id()
     PLATOON_PERSONNEL = auto_event_id()
     PLATOON_COMMANDERS = auto_event_id()
+    STUDENT_MENU = auto_event_id()
+    PLATOON_COMMANDER_MENU = auto_event_id()
+    SQUAD_COMMANDER_MENU = auto_event_id()
+    ADMIN_COMMANDER_MENU = auto_event_id()
+    ADD_STUDENT = auto_event_id()
+    SQUADS_LIST_MENU = auto_event_id()
 
 
 class MenuEvent:
+    STUDENT_MENU = _MenuGetEvent.STUDENT_MENU
+    PLATOON_COMMANDER_MENU = _MenuGetEvent.PLATOON_COMMANDER_MENU
+    SQUAD_COMMANDER_MENU = _MenuGetEvent.SQUAD_COMMANDER_MENU
+    ADMIN_COMMANDER_MENU = _MenuGetEvent.ADMIN_COMMANDER_MENU
     MAIN_MENU = _MenuGetEvent.MENU_EVENT
 
     class Student:
         EVALUATION = _MenuGetEvent.STUDENT_EVALUATION
         ATTENDANCE = _MenuGetEvent.STUDENT_ATTENDANCE
         PERSONAL_DATA = _MenuGetEvent.STUDENT_PERSONAL_DATA
+        BACK = _MenuGetEvent.MENU_EVENT
 
         class PersonalData:
             EDIT = auto_event_id()
-            BACK = _MenuGetEvent.MENU_EVENT
+            BACK = _MenuGetEvent.STUDENT_MENU
+
+        class Evaluation:
+            BACK = _MenuGetEvent.STUDENT_MENU
+
+    class CommanderSquad:
+        BACK = _MenuGetEvent.MENU_EVENT
+
+        class Evaluation:
+            BACK = _MenuGetEvent.SQUAD_COMMANDER_MENU
 
     class CommanderPlatoon:
-        ATTENDANCE = _MenuGetEvent.COMMANDER_PLATOON_ATTENDANCE
+        ADD_STUDENT = _MenuGetEvent.ADD_STUDENT
+        SQUADS_LIST_MENU = _MenuGetEvent.SQUADS_LIST_MENU
+        BACK = _MenuGetEvent.MENU_EVENT
 
     class Admin:
         PLATOONS = _MenuGetEvent.ADMIN_PLATOONS

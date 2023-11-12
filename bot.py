@@ -85,7 +85,7 @@ def send_welcome(message):
 
     keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=False, one_time_keyboard=True)
     main_menu = types.KeyboardButton(text=f'/{Commands.MENU}')
-    keyboard.add(main_menu)
+    # keyboard.add(main_menu)
 
     bot.send_message(message.chat.id, Message.WELCOME, reply_markup=keyboard)
 
@@ -98,17 +98,23 @@ def send_welcome(message):
 def menu(message):
     user = get_user(get_telegram_id(message))
 
-    if Role.STUDENT == Role.STUDENT and True:
+    if Role.STUDENT == Role.STUDENT and False:
         buttons = {
-            MenuEvent.Student.EVALUATION: MenuButtons.Text.EVALUATION,
-            MenuEvent.Student.ATTENDANCE: MenuButtons.Text.ATTENDANCE,
-            MenuEvent.Student.PERSONAL_DATA: MenuButtons.Text.PERSONAL_DATA,
+            MenuEvent.STUDENT_MENU: MenuButtons.Text.STUDENT_MENU,
         }
 
         menu_generator(message, buttons, Message.SUCCESSFUL)
-    elif Role.COMMANDER_PLATOON == Role.COMMANDER_PLATOON and False:
+    elif Role.COMMANDER_SQUAD == Role.COMMANDER_SQUAD and False:
         buttons = {
-            MenuEvent.CommanderPlatoon.ATTENDANCE: MenuButtons.Text.ATTENDANCE,
+            MenuEvent.STUDENT_MENU: MenuButtons.Text.STUDENT_MENU,
+            MenuEvent.SQUAD_COMMANDER_MENU: MenuButtons.Text.SQUAD_COMMANDER_MENU,
+        }
+
+        menu_generator(message, buttons, Message.SUCCESSFUL)
+    elif Role.COMMANDER_PLATOON == Role.COMMANDER_PLATOON and True:
+        buttons = {
+            MenuEvent.STUDENT_MENU: MenuButtons.Text.STUDENT_MENU,
+            MenuEvent.PLATOON_COMMANDER_MENU: MenuButtons.Text.PLATOON_COMMANDER_MENU,
         }
 
         menu_generator(message, buttons, Message.SUCCESSFUL)
@@ -120,6 +126,65 @@ def menu(message):
         }
 
         menu_generator(message, buttons, Message.SUCCESSFUL)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.STUDENT_MENU)
+# @check_connection_with_server(bot=bot)
+def student_menu(call: types.CallbackQuery):
+    buttons = {
+        MenuEvent.Student.EVALUATION: MenuButtons.Text.EVALUATION,
+        MenuEvent.Student.ATTENDANCE: MenuButtons.Text.ATTENDANCE,
+        MenuEvent.Student.PERSONAL_DATA: MenuButtons.Text.PERSONAL_DATA,
+        MenuEvent.Student.BACK: MenuButtons.Text.BACK,
+    }
+
+    menu_editor(call, buttons)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.SQUAD_COMMANDER_MENU)
+# @check_connection_with_server(bot=bot)
+def squad_menu(call: types.CallbackQuery):
+    buttons = {
+        1234: 'Тимофей',
+        4321: 'Александр',
+        MenuEvent.CommanderSquad.BACK: MenuButtons.Text.BACK,
+    }
+
+    for telegram_id, name_user in buttons.items():
+        if isinstance(telegram_id, int):
+            edit_users[telegram_id] = name_user
+            # Так будет на самом деле.
+            # edit_users[telegram_id] = ServerWorker().get_user(telegram_id)
+
+    menu_editor(call, buttons)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.PLATOON_COMMANDER_MENU)
+# @check_connection_with_server(bot=bot)
+def platoon_menu(call: types.CallbackQuery):
+    buttons = {
+        MenuEvent.CommanderPlatoon.ADD_STUDENT: MenuButtons.Text.ADD_STUDENT,
+        MenuEvent.CommanderPlatoon.SQUADS_LIST_MENU: MenuButtons.Text.SQUADS_LIST_MENU,
+        MenuEvent.CommanderPlatoon.BACK: MenuButtons.Text.BACK,
+    }
+
+    menu_editor(call, buttons)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.CommanderPlatoon.SQUADS_LIST_MENU)
+# @check_connection_with_server(bot=bot)
+def squad_list_menu(call: types.CallbackQuery):
+    command_get_platoon(call.message)
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.CommanderPlatoon.ADD_STUDENT)
+# @check_connection_with_server(bot=bot)
+def platoon_add_student_menu(call: types.CallbackQuery):
+    message = call.message
+
+    command_reg(message)
+    bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == MenuEvent.MAIN_MENU)
@@ -140,6 +205,19 @@ def student_pd(call: types.CallbackQuery):
     menu_editor(call, buttons)
 
 
+@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.Student.EVALUATION)
+# @check_connection_with_server(bot=bot)
+def student_evaluation(call: types.CallbackQuery):
+    buttons = {
+        '1': '1 семестр',
+        '2': '2 семестр',
+        '3': '3 семестр',
+        MenuEvent.Student.Evaluation.BACK: MenuButtons.Text.BACK,
+    }
+
+    menu_editor(call, buttons)
+
+
 @bot.callback_query_handler(func=lambda call: call.data == MenuEvent.Student.PersonalData.EDIT)
 # @check_connection_with_server(bot=bot)
 def student_pd(call: types.CallbackQuery):
@@ -149,26 +227,9 @@ def student_pd(call: types.CallbackQuery):
     bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.CommanderPlatoon.ATTENDANCE)
-# @check_connection_with_server(bot=bot)
-def student_pd(call: types.CallbackQuery):
-    message = call.message
-
-    command_get_platoon(message)
-    bot.delete_message(call.message.chat.id, call.message.message_id)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == MenuEvent.Student.ATTENDANCE)
 # @check_connection_with_server(bot=bot)
 def student_attendance(call: types.CallbackQuery):
-    message = call.message
-
-    bot.send_message(call.message.chat.id, Message.SUCCESSFUL)
-
-
-@bot.callback_query_handler(func=lambda call: call.data == MenuEvent.Student.EVALUATION)
-# @check_connection_with_server(bot=bot)
-def student_evaluation(call: types.CallbackQuery):
     message = call.message
 
     bot.send_message(call.message.chat.id, Message.SUCCESSFUL)
@@ -663,33 +724,6 @@ def handler_registration(user, message):
             user.state = None
 
 
-def add_user(user, message):
-    (name, date_of_brith, phone_number, mail, address,
-     institute, direction_of_study, group_study, course_number,
-     vus, platoon, squad) = user.writer.get_data()
-
-    ServerWorker().add_platoon(int(platoon), int(vus), 1)
-
-    params = {
-        'name': name,
-        'date_of_brith': date_of_brith,
-        'phone_number': phone_number,
-        'mail': mail,
-        'address': address,
-        'institute': institute,
-        'direction_of_study': direction_of_study,
-        'group_study': group_study,
-        'course_number': course_number,
-        'vus': vus,
-        'platoon': platoon,
-        'squad': squad,
-        'telegram_id': get_telegram_id(message),
-        'role': Role.STUDENT,
-    }
-
-    return ServerWorker().save_user(params)
-
-
 def handler_get_token(user, message):
     res = handler_state(user, message, GetTokenState, GET_TOKEN_VALIDATORS, GET_TOKEN_MSG_STATES)
 
@@ -790,6 +824,33 @@ def handler_select_squad(call, target_squad: str):
             markup.add(InlineKeyboardButton(user[0], callback_data=telegram_id))
 
     bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.id, reply_markup=markup)
+
+
+def add_user(user, message):
+    (name, date_of_brith, phone_number, mail, address,
+     institute, direction_of_study, group_study, course_number,
+     vus, platoon, squad) = user.writer.get_data()
+
+    ServerWorker().add_platoon(int(platoon), int(vus), 1)
+
+    params = {
+        'name': name,
+        'date_of_brith': date_of_brith,
+        'phone_number': phone_number,
+        'mail': mail,
+        'address': address,
+        'institute': institute,
+        'direction_of_study': direction_of_study,
+        'group_study': group_study,
+        'course_number': course_number,
+        'vus': vus,
+        'platoon': platoon,
+        'squad': squad,
+        'telegram_id': get_telegram_id(message),
+        'role': Role.STUDENT,
+    }
+
+    return ServerWorker().save_user(params)
 
 
 def menu_generator(message, buttons: dict, text: str):
